@@ -46,22 +46,12 @@
   <button id="skipBtn">Skip</button>
 </div>
 
-<!-- Beep Audio -->
+<!-- Hidden audio element for beep -->
 <audio id="beepSound" preload="auto">
   <source src="beep.mp3" type="audio/mpeg" />
-  <source src="beep.wav" type="audio/wav" />
 </audio>
 
 <script>
-  const daySelect = document.getElementById("daySelect");
-  const exerciseText = document.getElementById("exerciseText");
-  const timerEl = document.getElementById("timer");
-  const statusEl = document.getElementById("status");
-  const startBtn = document.getElementById("startBtn");
-  const playPauseBtn = document.getElementById("playPauseBtn");
-  const skipBtn = document.getElementById("skipBtn");
-  const beepAudio = document.getElementById("beepSound");
-
   const program = [
     { day: 1, exercise: "Zi libera", duration: 0 },
     { day: 2, exercise: "Plimbare 30 de minute", duration: 30 * 60 },
@@ -191,16 +181,23 @@ Mers rapid 4 min
 alergare ușoară 15 min`, duration: 48 * 60 },
     { day: 28, exercise: "Zi libera", duration: 0 },
   ];
+  const daySelect = document.getElementById("daySelect");
+  const exerciseText = document.getElementById("exerciseText");
+  const timerEl = document.getElementById("timer");
+  const statusEl = document.getElementById("status");
+  const startBtn = document.getElementById("startBtn");
+  const playPauseBtn = document.getElementById("playPauseBtn");
+  const skipBtn = document.getElementById("skipBtn");
 
   let currentDay = 1;
   let routineSteps = [];
   let currentStepIndex = 0;
-  let stepDuration = 0;
-  let stepStartTime = null;
-  let isPlaying = false;
+  let stepRemaining = 0;
   let timerInterval = null;
+  let isPlaying = false;
+  let stepStartTimestamp = null;
 
-  const synth = window.speechSynthesis;
+  let synth = window.speechSynthesis;
   let voices = [];
   let voice = null;
 
@@ -224,8 +221,9 @@ alergare ușoară 15 min`, duration: 48 * 60 },
   }
 
   function playBeep() {
-    beepAudio.currentTime = 0;
-    beepAudio.play().catch(() => {});
+    const beep = document.getElementById("beepSound");
+    beep.currentTime = 0;
+    beep.play().catch(() => {});
   }
 
   function updateTimerDisplay(seconds) {
@@ -268,21 +266,21 @@ alergare ușoară 15 min`, duration: 48 * 60 },
       return;
     }
     const step = routineSteps[currentStepIndex];
-    stepDuration = step.duration;
-    stepStartTime = Date.now();
+    stepRemaining = step.duration;
+    stepStartTimestamp = Date.now();
     statusEl.textContent = step.label;
     speak(step.label);
-    updateTimerDisplay(stepDuration);
-
+    updateTimerDisplay(stepRemaining);
     if (timerInterval) clearInterval(timerInterval);
-
     timerInterval = setInterval(() => {
       if (!isPlaying) return;
 
-      const elapsed = Math.floor((Date.now() - stepStartTime) / 1000);
-      const remaining = stepDuration - elapsed;
+      const elapsed = Math.floor((Date.now() - stepStartTimestamp) / 1000);
+      const remaining = stepRemaining - elapsed;
 
-      if (remaining <= 5 && remaining > 0) {
+      updateTimerDisplay(remaining);
+
+      if (remaining > 0 && remaining <= 5) {
         playBeep();
       }
 
@@ -290,8 +288,6 @@ alergare ușoară 15 min`, duration: 48 * 60 },
         clearInterval(timerInterval);
         nextStep();
       }
-
-      updateTimerDisplay(Math.max(0, remaining));
     }, 1000);
   }
 
@@ -324,7 +320,7 @@ alergare ușoară 15 min`, duration: 48 * 60 },
   function loadDay(day) {
     stopTimer();
     currentDay = day;
-    const dayData = program.find(d => d.day === Number(day));
+    const dayData = program.find(d => d.day === day);
     if (!dayData) return;
     exerciseText.textContent = dayData.exercise;
     routineSteps = parseRoutine(dayData.exercise);
@@ -341,11 +337,11 @@ alergare ușoară 15 min`, duration: 48 * 60 },
     if (!routineSteps.length) return;
     isPlaying = !isPlaying;
     if (isPlaying) {
-      const parts = timerEl.textContent.split(":");
-      const remaining = parseInt(parts[0]) * 60 + parseInt(parts[1]);
-      stepStartTime = Date.now() - (stepDuration - remaining) * 1000;
+      stepStartTimestamp = Date.now() - (stepRemaining - Math.floor(stepRemaining)) * 1000;
     }
-    statusEl.textContent = isPlaying ? routineSteps[currentStepIndex]?.label || "Continuare..." : "Pauză";
+    statusEl.textContent = isPlaying
+      ? routineSteps[currentStepIndex]?.label || "Continuare..."
+      : "Pauză";
   };
 
   skipBtn.onclick = () => {
@@ -353,44 +349,21 @@ alergare ușoară 15 min`, duration: 48 * 60 },
     nextStep();
   };
 
-  // Wake Lock to keep screen on
-  let wakeLock = null;
-  async function requestWakeLock() {
-    try {
-      wakeLock = await navigator.wakeLock?.request("screen");
-      wakeLock?.addEventListener("release", () => {
-        console.log("Wake Lock released");
-      });
-    } catch (err) {
-      console.error("Wake Lock error:", err);
-    }
-  }
+  daySelect.onchange = () => {
+    loadDay(parseInt(daySelect.value));
+  };
 
-  document.addEventListener("visibilitychange", () => {
-    if (wakeLock && document.visibilityState === "visible") {
-      requestWakeLock();
+  document.addEventListener("DOMContentLoaded", () => {
+    populateDays();
+    daySelect.value = 1;
+    loadDay(1);
+    voice = loadVoices();
+    if (synth.onvoiceschanged !== undefined) {
+      synth.onvoiceschanged = () => {
+        voice = loadVoices();
+      };
     }
   });
-
-document.addEventListener("DOMContentLoaded", () => {
-  populateDays();
-  daySelect.value = 1;
-  loadDay(1);
-
-  // Handle dropdown change
-  daySelect.addEventListener("change", () => {
-    loadDay(Number(daySelect.value));
-  });
-
-  voice = loadVoices();
-  if (synth.onvoiceschanged !== undefined) {
-    synth.onvoiceschanged = () => {
-      voice = loadVoices();
-    };
-  }
-  requestWakeLock();
-});
 </script>
-
 </body>
 </html>
