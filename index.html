@@ -324,7 +324,7 @@ alergare ușoară 15 min`, duration: 48 * 60 },
   function loadDay(day) {
     stopTimer();
     currentDay = day;
-    const dayData = program.find(d => d.day === day);
+    const dayData = program.find(d => d.day === Number(day));
     if (!dayData) return;
     exerciseText.textContent = dayData.exercise;
     routineSteps = parseRoutine(dayData.exercise);
@@ -372,18 +372,24 @@ alergare ușoară 15 min`, duration: 48 * 60 },
     }
   });
 
-  document.addEventListener("DOMContentLoaded", () => {
-    populateDays();
-    daySelect.value = 1;
-    loadDay(1);
-    voice = loadVoices();
-    if (synth.onvoiceschanged !== undefined) {
-      synth.onvoiceschanged = () => {
-        voice = loadVoices();
-      };
-    }
-    requestWakeLock(); // Prevent screen from turning off
+document.addEventListener("DOMContentLoaded", () => {
+  populateDays();
+  daySelect.value = 1;
+  loadDay(1);
+
+  // Handle dropdown change
+  daySelect.addEventListener("change", () => {
+    loadDay(Number(daySelect.value));
   });
+
+  voice = loadVoices();
+  if (synth.onvoiceschanged !== undefined) {
+    synth.onvoiceschanged = () => {
+      voice = loadVoices();
+    };
+  }
+  requestWakeLock();
+});
 </script>
 
 </body>
