@@ -228,6 +228,16 @@ alergare ușoară 15 min`, duration: 48 * 60 },
     beepAudio.play().catch(() => {});
   }
 
+  let audioUnlocked = false;
+  function unlockAudio() {
+    if (audioUnlocked) return;
+    beepAudio.play().then(() => {
+      beepAudio.pause();
+      beepAudio.currentTime = 0;
+      audioUnlocked = true;
+    }).catch(() => {});
+  }
+
   function updateTimerDisplay(seconds) {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
@@ -334,25 +344,25 @@ alergare ușoară 15 min`, duration: 48 * 60 },
   }
 
   startBtn.onclick = () => {
+    unlockAudio();
     if (!isPlaying) startTimer();
   };
 
   playPauseBtn.onclick = () => {
+    unlockAudio();
     if (!routineSteps.length) return;
     isPlaying = !isPlaying;
     if (isPlaying) {
-      stepStartTime = Date.now() - ((stepDuration - parseInt(timerEl.textContent.split(":")[0]) * 60 - parseInt(timerEl.textContent.split(":")[1])) * 1000);
+      const [min, sec] = timerEl.textContent.split(":").map(Number);
+      stepStartTime = Date.now() - ((stepDuration - (min * 60 + sec)) * 1000);
     }
     statusEl.textContent = isPlaying ? routineSteps[currentStepIndex]?.label || "Continuare..." : "Pauză";
   };
 
   skipBtn.onclick = () => {
+    unlockAudio();
     if (!routineSteps.length) return;
     nextStep();
-  };
-
-  daySelect.onchange = () => {
-    loadDay(parseInt(daySelect.value));
   };
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -366,6 +376,10 @@ alergare ușoară 15 min`, duration: 48 * 60 },
       };
     }
   });
+
+  daySelect.onchange = () => {
+    loadDay(parseInt(daySelect.value));
+  };
 </script>
 
 </body>
