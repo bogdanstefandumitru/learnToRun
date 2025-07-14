@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Program Exerciții cu Timer</title>
+  <link rel="manifest" href="manifest.json" />
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -12,23 +13,10 @@
       padding: 20px;
       background: #f9f9f9;
     }
-    h1 {
-      text-align: center;
-    }
-    #exerciseText {
-      margin: 20px 0;
-      white-space: pre-line;
-    }
-    #timer {
-      font-size: 48px;
-      text-align: center;
-      margin: 10px 0;
-    }
-    #status {
-      font-size: 20px;
-      text-align: center;
-      margin: 10px 0;
-    }
+    h1 { text-align: center; }
+    #exerciseText { margin: 20px 0; white-space: pre-line; }
+    #timer { font-size: 48px; text-align: center; margin: 10px 0; }
+    #status { font-size: 20px; text-align: center; margin: 10px 0; }
     button {
       margin: 5px;
       padding: 10px 15px;
@@ -58,20 +46,12 @@
   <button id="skipBtn">Skip</button>
 </div>
 
+<!-- Hidden audio element for beep -->
 <audio id="beepSound" preload="auto">
-  <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
+  <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=" type="audio/wav">
 </audio>
 
 <script>
-  const daySelect = document.getElementById("daySelect");
-  const exerciseText = document.getElementById("exerciseText");
-  const timerEl = document.getElementById("timer");
-  const statusEl = document.getElementById("status");
-  const startBtn = document.getElementById("startBtn");
-  const playPauseBtn = document.getElementById("playPauseBtn");
-  const skipBtn = document.getElementById("skipBtn");
-  const beepSound = document.getElementById("beepSound");
-
   const program = [
     { day: 1, exercise: "Zi libera", duration: 0 },
     { day: 2, exercise: "Plimbare 30 de minute", duration: 30 * 60 },
@@ -201,17 +181,49 @@ Mers rapid 4 min
 alergare ușoară 15 min`, duration: 48 * 60 },
     { day: 28, exercise: "Zi libera", duration: 0 },
   ];
+  const daySelect = document.getElementById("daySelect");
+  const exerciseText = document.getElementById("exerciseText");
+  const timerEl = document.getElementById("timer");
+  const statusEl = document.getElementById("status");
+  const startBtn = document.getElementById("startBtn");
+  const playPauseBtn = document.getElementById("playPauseBtn");
+  const skipBtn = document.getElementById("skipBtn");
 
-  let routineSteps = [], currentStepIndex = 0, stepRemaining = 0;
-  let timerInterval = null, isPlaying = false;
-  let stepStartTime = null;
+  let currentDay = 1;
+  let routineSteps = [];
+  let currentStepIndex = 0;
+  let stepRemaining = 0;
+  let timerInterval = null;
+  let isPlaying = false;
+  let stepStartTimestamp = null;
+
+  let synth = window.speechSynthesis;
+  let voices = [];
+  let voice = null;
+
+  function loadVoices() {
+    voices = synth.getVoices();
+    let v = voices.find(v => v.lang.startsWith('ro') && (v.name.toLowerCase().includes("alex") || v.name.toLowerCase().includes("male")));
+    if (!v) v = voices.find(v => v.lang.startsWith('ro'));
+    if (!v && voices.length) v = voices[0];
+    return v;
+  }
 
   function speak(text) {
-    const synth = window.speechSynthesis;
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = "ro-RO";
+    if (!synth) return;
     synth.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.voice = voice;
+    utter.lang = "ro-RO";
+    utter.rate = 1;
+    utter.pitch = 0.9;
     synth.speak(utter);
+  }
+
+  function playBeep() {
+    const beep = document.getElementById("beepSound");
+    beep.currentTime = 0;
+    beep.play().catch(() => {});
   }
 
   function updateTimerDisplay(seconds) {
@@ -220,19 +232,31 @@ alergare ușoară 15 min`, duration: 48 * 60 },
     timerEl.textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   }
 
-  function playBeep() {
-    beepSound.pause();
-    beepSound.currentTime = 0;
-    beepSound.play();
-  }
-
   function parseRoutine(text) {
     if (!text || text.toLowerCase().includes("liber")) return [];
-    return text.split("\n").map(line => {
-      const match = line.match(/(\w+.*?)\s(\d+)/);
-      if (match) return { label: match[1], duration: parseInt(match[2]) * 60 };
-      return null;
-    }).filter(Boolean);
+    const lines = text.split("\n");
+    const steps = [];
+    const regex = /(mers rapid|alergare ușoară|plimbare)\s*(\d+)\s*(min|minute)/i;
+    for (const line of lines) {
+      const m = line.match(regex);
+      if (m) {
+        const label = m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase();
+        const min = parseInt(m[2]);
+        steps.push({ label, duration: min * 60 });
+      }
+    }
+    return steps;
+  }
+
+  function nextStep() {
+    currentStepIndex++;
+    if (currentStepIndex >= routineSteps.length) {
+      stopTimer();
+      statusEl.textContent = "Exercițiul s-a terminat!";
+      speak("Exercițiul s-a terminat!");
+      return;
+    }
+    startStep();
   }
 
   function startStep() {
@@ -243,63 +267,66 @@ alergare ușoară 15 min`, duration: 48 * 60 },
     }
     const step = routineSteps[currentStepIndex];
     stepRemaining = step.duration;
-    stepStartTime = Date.now();
+    stepStartTimestamp = Date.now();
     statusEl.textContent = step.label;
     speak(step.label);
     updateTimerDisplay(stepRemaining);
-
     if (timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(() => {
-      const elapsed = Math.floor((Date.now() - stepStartTime) / 1000);
-      stepRemaining = step.duration - elapsed;
-      updateTimerDisplay(stepRemaining);
+      if (!isPlaying) return;
 
-      if (stepRemaining > 0 && stepRemaining <= 5) playBeep();
-      if (stepRemaining <= 0) {
+      const elapsed = Math.floor((Date.now() - stepStartTimestamp) / 1000);
+      const remaining = stepRemaining - elapsed;
+
+      updateTimerDisplay(remaining);
+
+      if (remaining > 0 && remaining <= 5) {
+        playBeep();
+      }
+
+      if (remaining <= 0) {
         clearInterval(timerInterval);
-        currentStepIndex++;
-        if (currentStepIndex < routineSteps.length) {
-          startStep();
-        } else {
-          statusEl.textContent = "Exercițiul s-a terminat!";
-          speak("Exercițiul s-a terminat!");
-        }
+        nextStep();
       }
     }, 1000);
   }
 
   function startTimer() {
-    if (!routineSteps.length) {
+    if (routineSteps.length === 0) {
       statusEl.textContent = "Zi liberă. Nu există exerciții.";
       timerEl.textContent = "00:00";
       return;
     }
     isPlaying = true;
-    currentStepIndex = 0;
     startStep();
   }
 
   function stopTimer() {
     isPlaying = false;
-    clearInterval(timerInterval);
+    currentStepIndex = 0;
+    if (timerInterval) clearInterval(timerInterval);
     timerEl.textContent = "00:00";
   }
 
   function populateDays() {
     for (const d of program) {
-      const opt = document.createElement("option");
-      opt.value = d.day;
-      opt.textContent = `Ziua ${d.day}`;
-      daySelect.appendChild(opt);
+      const option = document.createElement("option");
+      option.value = d.day;
+      option.textContent = `Ziua ${d.day}`;
+      daySelect.appendChild(option);
     }
   }
 
   function loadDay(day) {
     stopTimer();
-    const d = program.find(p => p.day == day);
-    exerciseText.textContent = d.exercise;
-    routineSteps = parseRoutine(d.exercise);
+    currentDay = day;
+    const dayData = program.find(d => d.day === day);
+    if (!dayData) return;
+    exerciseText.textContent = dayData.exercise;
+    routineSteps = parseRoutine(dayData.exercise);
+    currentStepIndex = 0;
     statusEl.textContent = "Așteaptă să începi...";
+    timerEl.textContent = "00:00";
   }
 
   startBtn.onclick = () => {
@@ -307,28 +334,36 @@ alergare ușoară 15 min`, duration: 48 * 60 },
   };
 
   playPauseBtn.onclick = () => {
+    if (!routineSteps.length) return;
     isPlaying = !isPlaying;
-    statusEl.textContent = isPlaying ? routineSteps[currentStepIndex]?.label || "Continuare..." : "Pauză";
+    if (isPlaying) {
+      stepStartTimestamp = Date.now() - (stepRemaining - Math.floor(stepRemaining)) * 1000;
+    }
+    statusEl.textContent = isPlaying
+      ? routineSteps[currentStepIndex]?.label || "Continuare..."
+      : "Pauză";
   };
 
   skipBtn.onclick = () => {
-    currentStepIndex++;
-    if (currentStepIndex < routineSteps.length) {
-      startStep();
-    } else {
-      statusEl.textContent = "Exercițiul s-a terminat!";
-      speak("Exercițiul s-a terminat!");
-    }
+    if (!routineSteps.length) return;
+    nextStep();
   };
 
-  daySelect.onchange = () => loadDay(daySelect.value);
+  daySelect.onchange = () => {
+    loadDay(parseInt(daySelect.value));
+  };
 
   document.addEventListener("DOMContentLoaded", () => {
     populateDays();
-    loadDay(1);
     daySelect.value = 1;
+    loadDay(1);
+    voice = loadVoices();
+    if (synth.onvoiceschanged !== undefined) {
+      synth.onvoiceschanged = () => {
+        voice = loadVoices();
+      };
+    }
   });
 </script>
-
 </body>
 </html>
