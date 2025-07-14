@@ -53,6 +53,15 @@
 </audio>
 
 <script>
+  const daySelect = document.getElementById("daySelect");
+  const exerciseText = document.getElementById("exerciseText");
+  const timerEl = document.getElementById("timer");
+  const statusEl = document.getElementById("status");
+  const startBtn = document.getElementById("startBtn");
+  const playPauseBtn = document.getElementById("playPauseBtn");
+  const skipBtn = document.getElementById("skipBtn");
+  const beepAudio = document.getElementById("beepSound");
+
   const program = [
     { day: 1, exercise: "Zi libera", duration: 0 },
     { day: 2, exercise: "Plimbare 30 de minute", duration: 30 * 60 },
@@ -183,15 +192,6 @@ alergare ușoară 15 min`, duration: 48 * 60 },
     { day: 28, exercise: "Zi libera", duration: 0 },
   ];
 
-  const daySelect = document.getElementById("daySelect");
-  const exerciseText = document.getElementById("exerciseText");
-  const timerEl = document.getElementById("timer");
-  const statusEl = document.getElementById("status");
-  const startBtn = document.getElementById("startBtn");
-  const playPauseBtn = document.getElementById("playPauseBtn");
-  const skipBtn = document.getElementById("skipBtn");
-  const beepAudio = document.getElementById("beepSound");
-
   let currentDay = 1;
   let routineSteps = [];
   let currentStepIndex = 0;
@@ -226,16 +226,6 @@ alergare ușoară 15 min`, duration: 48 * 60 },
   function playBeep() {
     beepAudio.currentTime = 0;
     beepAudio.play().catch(() => {});
-  }
-
-  let audioUnlocked = false;
-  function unlockAudio() {
-    if (audioUnlocked) return;
-    beepAudio.play().then(() => {
-      beepAudio.pause();
-      beepAudio.currentTime = 0;
-      audioUnlocked = true;
-    }).catch(() => {});
   }
 
   function updateTimerDisplay(seconds) {
@@ -344,26 +334,43 @@ alergare ușoară 15 min`, duration: 48 * 60 },
   }
 
   startBtn.onclick = () => {
-    unlockAudio();
     if (!isPlaying) startTimer();
   };
 
   playPauseBtn.onclick = () => {
-    unlockAudio();
     if (!routineSteps.length) return;
     isPlaying = !isPlaying;
     if (isPlaying) {
-      const [min, sec] = timerEl.textContent.split(":").map(Number);
-      stepStartTime = Date.now() - ((stepDuration - (min * 60 + sec)) * 1000);
+      const parts = timerEl.textContent.split(":");
+      const remaining = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+      stepStartTime = Date.now() - (stepDuration - remaining) * 1000;
     }
     statusEl.textContent = isPlaying ? routineSteps[currentStepIndex]?.label || "Continuare..." : "Pauză";
   };
 
   skipBtn.onclick = () => {
-    unlockAudio();
     if (!routineSteps.length) return;
     nextStep();
   };
+
+  // Wake Lock to keep screen on
+  let wakeLock = null;
+  async function requestWakeLock() {
+    try {
+      wakeLock = await navigator.wakeLock?.request("screen");
+      wakeLock?.addEventListener("release", () => {
+        console.log("Wake Lock released");
+      });
+    } catch (err) {
+      console.error("Wake Lock error:", err);
+    }
+  }
+
+  document.addEventListener("visibilitychange", () => {
+    if (wakeLock && document.visibilityState === "visible") {
+      requestWakeLock();
+    }
+  });
 
   document.addEventListener("DOMContentLoaded", () => {
     populateDays();
@@ -375,11 +382,8 @@ alergare ușoară 15 min`, duration: 48 * 60 },
         voice = loadVoices();
       };
     }
+    requestWakeLock(); // Prevent screen from turning off
   });
-
-  daySelect.onchange = () => {
-    loadDay(parseInt(daySelect.value));
-  };
 </script>
 
 </body>
