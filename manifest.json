@@ -1,9 +1,9 @@
 {
   "name": "Program Exerciții",
   "short_name": "Exerciții",
-  "start_url": "./",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f9f9f9",
+  "background_color": "#ffffff",
   "theme_color": "#ffffff",
   "icons": [
     {
