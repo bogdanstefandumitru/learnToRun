@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Program Exerciții cu Timer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" sizes="192x192" href="icon-192.png">
   <meta name="theme-color" content="#ffffff" />
@@ -84,6 +85,11 @@
       background-color: #ccc; /* gray like other disabled buttons */
       color: #f44336; /* red icon remains */
     }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+      font-size: 32px;
+      vertical-align: middle;
+    }
   </style>
 </head>
 <body>
@@ -99,10 +105,18 @@
 <div id="status">Așteaptă să începi...</div>
 
 <div style="text-align:center;">
-  <button id="startBtn" disabled title="Start">🟢</button>
-  <button id="pauseBtn" disabled title="Pauză" style="display: inline-block;">🔴</button>
-  <button id="playBtn" disabled title="Play" style="display: none;">▶️</button>
-  <button id="skipBtn" disabled title="Skip">⏭️</button>
+<button id="startBtn" disabled title="Start">
+  <span class="material-symbols-outlined">run_circle</span>
+</button>
+<button id="pauseBtn" disabled title="Pauză" style="display: inline-block;">
+  <span class="material-symbols-outlined">pause_circle</span>
+</button>
+<button id="playBtn" disabled title="Play" style="display: none;">
+  <span class="material-symbols-outlined">play_circle</span>
+</button>
+<button id="skipBtn" disabled title="Skip">
+  <span class="material-symbols-outlined">next_plan</span>
+</button>
 </div>
 
 <!-- Audio for beep -->
