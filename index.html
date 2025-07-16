@@ -195,23 +195,25 @@ Alergare ușoară 15 min`, duration: 48 * 60 },
   const playPauseBtn = document.getElementById("playPauseBtn");
   const skipBtn = document.getElementById("skipBtn");
   let routineSteps = [];
-let currentStepIndex = 0;
-let stepRemaining = 0;
-let stepStartTimestamp = 0;
-let timerInterval = null;
-let isPlaying = false;
-let currentDay = 1;
+  let currentStepIndex = 0;
+  let stepRemaining = 0;
+  let stepStartTimestamp = 0;
+  let timerInterval = null;
+  let isPlaying = false;
+  let currentDay = 1;
   let synth = window.speechSynthesis;
-let voices = [];
-let voice = null;
+  let voices = [];
+  let voice = null;
+  let stepRemaining = 0;
+  let stepStartTimestamp = 0;
 
 function updateButtonStates() {
   const hasDaySelected = !!routineSteps.length;
   const hasStarted = currentStepIndex > 0 || isPlaying;
 
-  startBtn.disabled = !hasDaySelected || hasStarted;
-  skipBtn.disabled = !hasDaySelected || !hasStarted;
-  playPauseBtn.disabled = !hasDaySelected || !hasStarted;
+  startBtn.disabled = true;
+  skipBtn.disabled = !hasStarted;
+  playPauseBtn.disabled = !hasDaySelected || currentStepIndex >= routineSteps.length;
 
   playPauseBtn.textContent = isPlaying ? "Pauză" : "Play";
 }
@@ -260,7 +262,7 @@ function speak(text) {
     }
 
     const step = routineSteps[currentStepIndex];
-    stepRemaining = step.duration;
+    stepRemaining = stepRemaining || step.duration;
     stepStartTimestamp = Date.now();
     statusEl.textContent = step.label;
     speak(step.label);
@@ -298,13 +300,13 @@ playPauseBtn.onclick = () => {
   isPlaying = !isPlaying;
 
   if (isPlaying) {
-    stepStartTimestamp = Date.now() - (stepRemaining - Math.floor(stepRemaining)) * 1000;
-    startStep();
+    // Resume from paused state
+    stepStartTimestamp = Date.now() - ((routineSteps[currentStepIndex].duration - stepRemaining) * 1000);
+  } else {
+    // Calculate how much time is left when paused
+    const elapsed = Math.floor((Date.now() - stepStartTimestamp) / 1000);
+    stepRemaining = routineSteps[currentStepIndex].duration - elapsed;
   }
-
-  statusEl.textContent = isPlaying
-    ? routineSteps[currentStepIndex]?.label || "Continuare..."
-    : "Pauză";
 
   updateButtonStates();
 };
