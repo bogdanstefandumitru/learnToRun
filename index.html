@@ -1,576 +1,562 @@
-<!DOCTYPE html>
-<html lang="ro">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Program Exerciții cu Timer</title>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-  <link rel="manifest" href="manifest.json" />
-  <link rel="icon" sizes="192x192" href="icon-192.png">
-  <meta name="theme-color" content="#ffffff" />
-  <style>
-    body {
-      font-family: 'Segoe UI', Roboto, sans-serif;
-      max-width: 600px;
-      margin: auto;
-      padding: 20px;
-      background: linear-gradient(to bottom, #e3f2fd, #ffffff);
-      color: #333;
-    }
-    h1 {
-      text-align: center;
-      color: #1565c0;
-      margin-bottom: 16px;
-    }
-    label {
-      font-weight: bold;
-      margin-bottom: 8px;
-      display: inline-block;
-    }
-    select {
-      font-size: 16px;
-      padding: 8px 12px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      background: white;
-      margin-bottom: 20px;
-      width: 100%;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    #exerciseText {
-      background: #ffffff;
-      border-left: 4px solid #2196f3;
-      padding: 15px;
-      border-radius: 8px;
-      margin: 16px 0;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      font-size: 17px;
-    }
-
-    #timer {
-      font-size: 64px;
-      font-weight: bold;
-      text-align: center;
-      margin: 20px 0 10px;
-      color: #212121;
-      letter-spacing: 1px;
-    }
+    <!DOCTYPE html>
+    <html lang="ro">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>Program Exerciții cu Timer</title>
+      <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+      <link rel="manifest" href="manifest.json" />
+      <link rel="icon" sizes="192x192" href="icon-192.png">
+      <meta name="theme-color" content="#ffffff" />
+      <style>
+        body {
+          font-family: 'Segoe UI', Roboto, sans-serif;
+          max-width: 600px;
+          margin: auto;
+          padding: 20px;
+          background: linear-gradient(to bottom, #e3f2fd, #ffffff);
+          color: #333;
+        }
+        h1 {
+          text-align: center;
+          color: #1565c0;
+          margin-bottom: 16px;
+        }
+        label {
+          font-weight: bold;
+          margin-bottom: 8px;
+          display: inline-block;
+        }
+        select {
+          font-size: 16px;
+          padding: 8px 12px;
+          border: 1px solid #ccc;
+          border-radius: 8px;
+          background: white;
+          margin-bottom: 20px;
+          width: 100%;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        #exerciseText {
+          background: #ffffff;
+          border-left: 4px solid #2196f3;
+          padding: 15px;
+          border-radius: 8px;
+          margin: 16px 0;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          font-size: 17px;
+        }
+        #timer {
+          font-size: 64px;
+          font-weight: bold;
+          text-align: center;
+          margin: 20px 0 10px;
+          color: #212121;
+          letter-spacing: 1px;
+        }
     
-    #status {
-      font-size: 22px;
-      text-align: center;
-      margin-bottom: 24px;
-      color: #555;
+        #status {
+          font-size: 22px;
+          text-align: center;
+          margin-bottom: 24px;
+          color: #555;
+        }
+        button {
+          margin: 5px;
+          padding: 12px 16px;
+          font-size: 24px;
+          border: none;
+          border-radius: 12px;
+          background-color: #4CAF50; /* default green */
+          color: white;
+          cursor: pointer;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+          transition: background 0.2s ease;
+        }
+        button:disabled {
+          background-color: #ccc;
+          cursor: not-allowed;
+        }
+        button:hover:not(:disabled) {
+          background-color: #45a049;
+        }
+        .exercise-step {
+          padding: 4px 0;
+        }
+        .past-step {
+          color: #aaa;
+          text-decoration: line-through;
+        }
+        .current-step {
+          color: #1565c0;
+          font-weight: bold;
+        }
+        #pauseBtn {
+          background-color: #f44336;
+          color: white;
+        }
+        #pauseBtn:hover:not(:disabled) {
+          background-color: #e53935;
+        }
+        #pauseBtn:disabled {
+          background-color: #ccc; 
+        }
+        .material-symbols-outlined {
+          font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+          font-size: 32px;
+          vertical-align: middle;
+        }
+      </style>
+    </head>
+    <body>
+
+    <h1>Program Exerciții</h1>
+
+    <label for="daySelect">Alege ziua:</label>
+    <select id="daySelect"></select>
+
+    <div id="exerciseText"></div>
+
+    <div id="timer">00:00</div>
+    <div id="status">Așteaptă să începi...</div>
+
+    <div style="text-align:center;">
+    <button id="startBtn" disabled title="Start">
+      <span class="material-symbols-outlined">run_circle</span>
+    </button>
+    <button id="pauseBtn" disabled title="Pauză" style="display: inline-block;">
+      <span class="material-symbols-outlined">pause_circle</span>
+    </button>
+    <button id="playBtn" disabled title="Play" style="display: none;">
+      <span class="material-symbols-outlined">play_circle</span>
+    </button>
+    <button id="skipBtn" disabled title="Skip">
+      <span class="material-symbols-outlined">next_plan</span>
+    </button>
+    </div>
+
+    <audio id="beepSound" preload="auto">
+      <source src="beep.mp3" type="audio/mpeg" />
+      <source src="beep.wav" type="audio/wav" />
+    </audio>
+
+    <script>
+      const program = [
+        { day: 1, exercise: "Zi libera", duration: 0 },
+        { day: 2, exercise: "Plimbare 30 de minute", duration: 30 * 60 },
+        { day: 3, exercise: "Plimbare 30 de minute", duration: 30 * 60 },
+        { day: 4, exercise: "Plimbare 30 de minute", duration: 30 * 60 },
+        { day: 5, exercise: "Zi libera", duration: 0 },
+        { day: 6, exercise: "Plimbare 30 de minute", duration: 30 * 60 },
+        { day: 7, exercise: "Zi libera", duration: 0 },
+        { day: 8, exercise: `Mers rapid 3 min
+    Alergare ușoară 1 min
+    Mers rapid 3 minute
+    Alergare ușoară 1 min
+    Mers rapid 3 min
+    Alergare ușoară 1 min
+    Mers rapid 3 min
+    Alergare ușoară 1 min
+    Mers rapid 3 min
+    Alergare ușoară 1 min`, duration: 20 * 60 },
+        { day: 9, exercise: `Mers rapid 3 min
+    Alergare ușoară 1 min
+    Mers rapid 3 minute
+    Alergare ușoară 1 min
+    Mers rapid 3 min
+    Alergare ușoară 1 min
+    Mers rapid 3 min
+    Alergare ușoară 1 min
+    Mers rapid 3 min
+    Alergare ușoară 1 min`, duration: 20 * 60 },
+        { day: 10, exercise: `Mers rapid 3 min
+    Alergare ușoară 1 min
+    Mers rapid 3 minute
+    Alergare ușoară 1 min
+    Mers rapid 3 min
+    Alergare ușoară 1 min
+    Mers rapid 3 min
+    Alergare ușoară 1 min
+    Mers rapid 3 min
+    Alergare ușoară 1 min`, duration: 20 * 60 },
+        { day: 11, exercise: "Plimbare 30 de minute", duration: 30 * 60 },
+        { day: 12, exercise: `Mers rapid 3 min
+    Alergare ușoară 2 min
+    Mers rapid 3 minute
+    Alergare ușoară 2 min
+    Mers rapid 3 min
+    Alergare ușoară 2 min
+    Mers rapid 3 min
+    Alergare ușoară 2 min`, duration: 25 * 60 },
+        { day: 13, exercise: `Mers rapid 3 min
+    Alergare ușoară 2 min
+    Mers rapid 3 minute
+    Alergare ușoară 2 min
+    Mers rapid 3 min
+    Alergare ușoară 2 min
+    Mers rapid 3 min
+    Alergare ușoară 2 min`, duration: 25 * 60 },
+        { day: 14, exercise: "Zi libera", duration: 0 },
+        { day: 15, exercise: `Mers rapid 3 min
+    Alergare ușoară 2 min
+    Mers rapid 3 minute
+    Alergare ușoară 2 min
+    Mers rapid 3 min
+    Alergare ușoară 2 min
+    Mers rapid 3 min
+    Alergare ușoară 3 min
+    Mers rapid 3 min
+    Alergare ușoară 3 min`, duration: 27 * 60 },
+        { day: 16, exercise: `Mers rapid 3 min
+    Alergare ușoară 2 min
+    Mers rapid 3 minute
+    Alergare ușoară 2 min
+    Mers rapid 3 min
+    Alergare ușoară 2 min
+    Mers rapid 3 min
+    Alergare ușoară 2 min
+    Mers rapid 3 min
+    Alergare ușoară 2 min`, duration: 30 * 60 },
+        { day: 17, exercise: "Plimbare 30 de minute", duration: 30 * 60 },
+        { day: 18, exercise: `Mers rapid 2 min
+    Alergare ușoară 3 min
+    Mers rapid 2 min
+    Alergare ușoară 3 min
+    Mers rapid 2 min
+    Alergare ușoară 3 min
+    Mers rapid 2 min
+    Alergare ușoară 3 min
+    Mers rapid 2 min
+    Alergare ușoară 3 min`, duration: 25 * 60 },
+        { day: 19, exercise: "Plimbare 30 de minute", duration: 30 * 60 },
+        { day: 20, exercise: `Mers rapid 2 min
+    Alergare ușoară 5 min
+    Mers rapid 2 min
+    Alergare ușoară 5 min
+    Mers rapid 3 min
+    Alergare ușoară 3 min
+    Mers rapid 3 min
+    Alergare ușoară 3 min
+    Mers rapid 3 min
+    Alergare ușoară 3 min`, duration: 32 * 60 },
+        { day: 21, exercise: "Zi libera", duration: 0 },
+        { day: 22, exercise: `Mers rapid 3 min
+    Alergare ușoară 5 min
+    Mers rapid 3 min
+    Alergare ușoară 5 min
+    Mers rapid 4 min
+    Alergare ușoară 10 min`, duration: 30 * 60 },
+        { day: 23, exercise: `Mers rapid 3 min
+    Alergare ușoară 10 min
+    Mers rapid 3 min
+    Alergare ușoară 10 min
+    Mers rapid 3 min
+    Alergare ușoară 10 min`, duration: 39 * 60 },
+        { day: 24, exercise: "Plimbare 30 de minute", duration: 30 * 60 },
+        { day: 25, exercise: `Mers rapid 3 min
+    Alergare ușoară 10 min
+    Mers rapid 3 min
+    Alergare ușoară 10 min
+    Mers rapid 4 min
+    Alergare ușoară 5 min
+    Mers rapid 4 min
+    Alergare ușoară 5 min`, duration: 44 * 60 },
+        { day: 26, exercise: "Zi libera", duration: 0 },
+        { day: 27, exercise: `Mers rapid 5 min
+    Alergare ușoară 5 min
+    Mers rapid 4 min
+    Alergare ușoară 15 min
+    Mers rapid 4 min
+    Alergare ușoară 15 min`, duration: 48 * 60 },
+        { day: 28, exercise: "Zi libera", duration: 0 },
+      ];
+      const daySelect = document.getElementById("daySelect");
+      const exerciseText = document.getElementById("exerciseText");
+      const timerEl = document.getElementById("timer");
+      const statusEl = document.getElementById("status");
+      const startBtn = document.getElementById("startBtn");
+      const playPauseBtn = document.getElementById("playPauseBtn");
+      const skipBtn = document.getElementById("skipBtn");
+      let routineSteps = [];
+      let currentStepIndex = 0;
+      let stepRemaining = 0;
+      let stepStartTimestamp = 0;
+      let timerInterval = null;
+      let isPlaying = false;
+      let currentDay = 1;
+      let synth = window.speechSynthesis;
+      let voices = [];
+      let voice = null;
+
+    function updateButtonStates() {
+      const hasDaySelected = !!routineSteps.length;
+      const isFinished = currentStepIndex >= routineSteps.length;
+      const isAtBeginning = !isPlaying && currentStepIndex === 0 && stepRemaining === 0;
+
+      startBtn.disabled = !(hasDaySelected && isAtBeginning);
+      skipBtn.disabled = !hasDaySelected || isAtBeginning || isFinished;
+
+      if (isPlaying) {
+        pauseBtn.style.display = "inline-block";
+        pauseBtn.disabled = false;
+        playBtn.style.display = "none";
+      } else if (!isAtBeginning && !isFinished) {
+        pauseBtn.style.display = "none";
+        playBtn.style.display = "inline-block";
+        playBtn.disabled = false;
+      } else {
+        pauseBtn.style.display = "inline-block";
+        pauseBtn.disabled = true;
+        playBtn.style.display = "none";
+      }
     }
-    button {
-      margin: 5px;
-      padding: 12px 16px;
-      font-size: 24px;
-      border: none;
-      border-radius: 12px;
-      background-color: #4CAF50; /* default green */
-      color: white;
-      cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-      transition: background 0.2s ease;
+
+    function loadVoices() {
+      voices = synth.getVoices();
+      let v = voices.find(v => v.lang.startsWith('ro') && (v.name.toLowerCase().includes("alex") || v.name.toLowerCase().includes("male")));
+      if (!v) v = voices.find(v => v.lang.startsWith('ro'));
+      if (!v && voices.length) v = voices[0];
+      return v;
     }
-    
-    button:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
+
+    function speak(text) {
+      if (!synth) return;
+      synth.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.voice = voice;
+      utter.lang = "ro-RO";
+      utter.rate = 1;
+      utter.pitch = 0.9;
+      synth.speak(utter);
     }
-    
-    /* Hover effect for enabled buttons */
-    button:hover:not(:disabled) {
-      background-color: #45a049;
+
+    function playBeep() {
+      const beep = document.getElementById("beepSound");
+      beep.pause();
+      beep.currentTime = 0;
+      beep.play().catch(err => {
+        console.log("Beep blocked or failed:", err);
+      });
     }
-    .exercise-step {
-      padding: 4px 0;
+
+    function updateTimerDisplay(seconds) {
+      const min = Math.floor(seconds / 60);
+      const sec = seconds % 60;
+      timerEl.textContent = `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
     }
-    
-    .past-step {
-      color: #aaa;
-      text-decoration: line-through;
-    }
-    .current-step {
-      color: #1565c0;
-      font-weight: bold;
-    }
-    /* Red style for pause */
-    #pauseBtn {
-      background-color: #f44336; /* red background when active */
-      color: white;
-    }
-    
-    #pauseBtn:hover:not(:disabled) {
-      background-color: #e53935;
-    }
-    
-    #pauseBtn:disabled {
-      background-color: #ccc; 
-    }
-    .material-symbols-outlined {
-      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48;
-      font-size: 32px;
-      vertical-align: middle;
-    }
-  </style>
-</head>
-<body>
 
-<h1>Program Exerciții</h1>
+    function startStep(suppressSpeech = false) {
+      if (routineSteps.length === 0) {
+        statusEl.textContent = "Zi liberă. Nu există exerciții.";
+        timerEl.textContent = "00:00";
+        return;
+      }
 
-<label for="daySelect">Alege ziua:</label>
-<select id="daySelect"></select>
+      const step = routineSteps[currentStepIndex];
+      stepRemaining = stepRemaining || step.duration;
+      if (!stepStartTimestamp) {
+        stepStartTimestamp = Date.now();
+      }
 
-<div id="exerciseText"></div>
+      statusEl.textContent = step.label;
+      if (!suppressSpeech) {
+        speak(step.label);
+      }
+      updateTimerDisplay(stepRemaining);
+      renderExerciseList();
 
-<div id="timer">00:00</div>
-<div id="status">Așteaptă să începi...</div>
+      if (timerInterval) clearInterval(timerInterval);
 
-<div style="text-align:center;">
-<button id="startBtn" disabled title="Start">
-  <span class="material-symbols-outlined">run_circle</span>
-</button>
-<button id="pauseBtn" disabled title="Pauză" style="display: inline-block;">
-  <span class="material-symbols-outlined">pause_circle</span>
-</button>
-<button id="playBtn" disabled title="Play" style="display: none;">
-  <span class="material-symbols-outlined">play_circle</span>
-</button>
-<button id="skipBtn" disabled title="Skip">
-  <span class="material-symbols-outlined">next_plan</span>
-</button>
-</div>
+      let lastBeepSecond = null;
 
-<!-- Audio for beep -->
-<audio id="beepSound" preload="auto">
-  <source src="beep.mp3" type="audio/mpeg" />
-  <source src="beep.wav" type="audio/wav" />
-</audio>
-
-<script>
-  const program = [
-    { day: 1, exercise: "Zi libera", duration: 0 },
-    { day: 2, exercise: "Plimbare 30 de minute", duration: 30 * 60 },
-    { day: 3, exercise: "Plimbare 30 de minute", duration: 30 * 60 },
-    { day: 4, exercise: "Plimbare 30 de minute", duration: 30 * 60 },
-    { day: 5, exercise: "Zi libera", duration: 0 },
-    { day: 6, exercise: "Plimbare 30 de minute", duration: 30 * 60 },
-    { day: 7, exercise: "Zi libera", duration: 0 },
-    { day: 8, exercise: `Mers rapid 3 min
-Alergare ușoară 1 min
-Mers rapid 3 minute
-Alergare ușoară 1 min
-Mers rapid 3 min
-Alergare ușoară 1 min
-Mers rapid 3 min
-Alergare ușoară 1 min
-Mers rapid 3 min
-Alergare ușoară 1 min`, duration: 20 * 60 },
-    { day: 9, exercise: `Mers rapid 3 min
-Alergare ușoară 1 min
-Mers rapid 3 minute
-Alergare ușoară 1 min
-Mers rapid 3 min
-Alergare ușoară 1 min
-Mers rapid 3 min
-Alergare ușoară 1 min
-Mers rapid 3 min
-Alergare ușoară 1 min`, duration: 20 * 60 },
-    { day: 10, exercise: `Mers rapid 3 min
-Alergare ușoară 1 min
-Mers rapid 3 minute
-Alergare ușoară 1 min
-Mers rapid 3 min
-Alergare ușoară 1 min
-Mers rapid 3 min
-Alergare ușoară 1 min
-Mers rapid 3 min
-Alergare ușoară 1 min`, duration: 20 * 60 },
-    { day: 11, exercise: "Plimbare 30 de minute", duration: 30 * 60 },
-    { day: 12, exercise: `Mers rapid 3 min
-Alergare ușoară 2 min
-Mers rapid 3 minute
-Alergare ușoară 2 min
-Mers rapid 3 min
-Alergare ușoară 2 min
-Mers rapid 3 min
-Alergare ușoară 2 min`, duration: 25 * 60 },
-    { day: 13, exercise: `Mers rapid 3 min
-Alergare ușoară 2 min
-Mers rapid 3 minute
-Alergare ușoară 2 min
-Mers rapid 3 min
-Alergare ușoară 2 min
-Mers rapid 3 min
-Alergare ușoară 2 min`, duration: 25 * 60 },
-    { day: 14, exercise: "Zi libera", duration: 0 },
-    { day: 15, exercise: `Mers rapid 3 min
-Alergare ușoară 2 min
-Mers rapid 3 minute
-Alergare ușoară 2 min
-Mers rapid 3 min
-Alergare ușoară 2 min
-Mers rapid 3 min
-Alergare ușoară 3 min
-Mers rapid 3 min
-Alergare ușoară 3 min`, duration: 27 * 60 },
-    { day: 16, exercise: `Mers rapid 3 min
-Alergare ușoară 2 min
-Mers rapid 3 minute
-Alergare ușoară 2 min
-Mers rapid 3 min
-Alergare ușoară 2 min
-Mers rapid 3 min
-Alergare ușoară 2 min
-Mers rapid 3 min
-Alergare ușoară 2 min`, duration: 30 * 60 },
-    { day: 17, exercise: "Plimbare 30 de minute", duration: 30 * 60 },
-    { day: 18, exercise: `Mers rapid 2 min
-Alergare ușoară 3 min
-Mers rapid 2 min
-Alergare ușoară 3 min
-Mers rapid 2 min
-Alergare ușoară 3 min
-Mers rapid 2 min
-Alergare ușoară 3 min
-Mers rapid 2 min
-Alergare ușoară 3 min`, duration: 25 * 60 },
-    { day: 19, exercise: "Plimbare 30 de minute", duration: 30 * 60 },
-    { day: 20, exercise: `Mers rapid 2 min
-Alergare ușoară 5 min
-Mers rapid 2 min
-Alergare ușoară 5 min
-Mers rapid 3 min
-Alergare ușoară 3 min
-Mers rapid 3 min
-Alergare ușoară 3 min
-Mers rapid 3 min
-Alergare ușoară 3 min`, duration: 32 * 60 },
-    { day: 21, exercise: "Zi libera", duration: 0 },
-    { day: 22, exercise: `Mers rapid 3 min
-Alergare ușoară 5 min
-Mers rapid 3 min
-Alergare ușoară 5 min
-Mers rapid 4 min
-Alergare ușoară 10 min`, duration: 30 * 60 },
-    { day: 23, exercise: `Mers rapid 3 min
-Alergare ușoară 10 min
-Mers rapid 3 min
-Alergare ușoară 10 min
-Mers rapid 3 min
-Alergare ușoară 10 min`, duration: 39 * 60 },
-    { day: 24, exercise: "Plimbare 30 de minute", duration: 30 * 60 },
-    { day: 25, exercise: `Mers rapid 3 min
-Alergare ușoară 10 min
-Mers rapid 3 min
-Alergare ușoară 10 min
-Mers rapid 4 min
-Alergare ușoară 5 min
-Mers rapid 4 min
-Alergare ușoară 5 min`, duration: 44 * 60 },
-    { day: 26, exercise: "Zi libera", duration: 0 },
-    { day: 27, exercise: `Mers rapid 5 min
-Alergare ușoară 5 min
-Mers rapid 4 min
-Alergare ușoară 15 min
-Mers rapid 4 min
-Alergare ușoară 15 min`, duration: 48 * 60 },
-    { day: 28, exercise: "Zi libera", duration: 0 },
-  ];
-  const daySelect = document.getElementById("daySelect");
-  const exerciseText = document.getElementById("exerciseText");
-  const timerEl = document.getElementById("timer");
-  const statusEl = document.getElementById("status");
-  const startBtn = document.getElementById("startBtn");
-  const playPauseBtn = document.getElementById("playPauseBtn");
-  const skipBtn = document.getElementById("skipBtn");
-  let routineSteps = [];
-  let currentStepIndex = 0;
-  let stepRemaining = 0;
-  let stepStartTimestamp = 0;
-  let timerInterval = null;
-  let isPlaying = false;
-  let currentDay = 1;
-  let synth = window.speechSynthesis;
-  let voices = [];
-  let voice = null;
-
-function updateButtonStates() {
-  const hasDaySelected = !!routineSteps.length;
-  const isFinished = currentStepIndex >= routineSteps.length;
-  const isAtBeginning = !isPlaying && currentStepIndex === 0 && stepRemaining === 0;
-
-  startBtn.disabled = !(hasDaySelected && isAtBeginning);
-  skipBtn.disabled = !hasDaySelected || isAtBeginning || isFinished;
-
-  // Toggle Pause/Play buttons
-  if (isPlaying) {
-    pauseBtn.style.display = "inline-block";
-    pauseBtn.disabled = false;
-    playBtn.style.display = "none";
-  } else if (!isAtBeginning && !isFinished) {
-    pauseBtn.style.display = "none";
-    playBtn.style.display = "inline-block";
-    playBtn.disabled = false;
-  } else {
-    pauseBtn.style.display = "inline-block";
-    pauseBtn.disabled = true;
-    playBtn.style.display = "none";
-  }
-}
-
-function loadVoices() {
-  voices = synth.getVoices();
-  let v = voices.find(v => v.lang.startsWith('ro') && (v.name.toLowerCase().includes("alex") || v.name.toLowerCase().includes("male")));
-  if (!v) v = voices.find(v => v.lang.startsWith('ro'));
-  if (!v && voices.length) v = voices[0];
-  return v;
-}
-
-function speak(text) {
-  if (!synth) return;
-  synth.cancel();
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.voice = voice;
-  utter.lang = "ro-RO";
-  utter.rate = 1;
-  utter.pitch = 0.9;
-  synth.speak(utter);
-}
-
-  // Modify playBeep to ensure reliable playback
-  function playBeep() {
-    const beep = document.getElementById("beepSound");
-    beep.pause();
-    beep.currentTime = 0;
-    beep.play().catch(err => {
-      console.log("Beep blocked or failed:", err);
-    });
-  }
-
-  function updateTimerDisplay(seconds) {
-    const min = Math.floor(seconds / 60);
-    const sec = seconds % 60;
-    timerEl.textContent = `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
-  }
-
-function startStep(suppressSpeech = false) {
-  if (routineSteps.length === 0) {
-    statusEl.textContent = "Zi liberă. Nu există exerciții.";
-    timerEl.textContent = "00:00";
-    return;
-  }
-
-  const step = routineSteps[currentStepIndex];
-  stepRemaining = stepRemaining || step.duration;
-  if (!stepStartTimestamp) {
-    stepStartTimestamp = Date.now();
-  }
-
-  statusEl.textContent = step.label;
-  if (!suppressSpeech) {
-    speak(step.label); // ✅ only speak if not resuming
-  }
-  updateTimerDisplay(stepRemaining);
-  renderExerciseList();
-
-  if (timerInterval) clearInterval(timerInterval);
-
-  let lastBeepSecond = null;
-
-  timerInterval = setInterval(() => {
-    if (!isPlaying) return;
+      timerInterval = setInterval(() => {
+        if (!isPlaying) return;
   
-    const now = Date.now();
-    const elapsed = Math.floor((now - stepStartTimestamp) / 1000);
-    const remaining = Math.max(0, stepRemaining - elapsed);
-    updateTimerDisplay(remaining);
+        const now = Date.now();
+        const elapsed = Math.floor((now - stepStartTimestamp) / 1000);
+        const remaining = Math.max(0, stepRemaining - elapsed);
+        updateTimerDisplay(remaining);
   
-    if (remaining > 0 && remaining <= 5 && remaining !== lastBeepSecond) {
-      lastBeepSecond = remaining;
-      playBeep();
-    }
+        if (remaining > 0 && remaining <= 5 && remaining !== lastBeepSecond) {
+          lastBeepSecond = remaining;
+          playBeep();
+        }
     
-    if (remaining <= 0) {
+        if (remaining <= 0) {
+          clearInterval(timerInterval);
+          nextStep();
+        }
+      }, 200);
+    }
+
+    pauseBtn.onclick = () => {
+      if (!routineSteps.length || currentStepIndex >= routineSteps.length) return;
+      const now = Date.now();
+      const elapsed = Math.floor((now - stepStartTimestamp) / 1000);
+      stepRemaining = Math.max(0, stepRemaining - elapsed);
+      stepStartTimestamp = 0;
+      isPlaying = false;
       clearInterval(timerInterval);
-      nextStep();
-    }
-  }, 200);
-}
-
-pauseBtn.onclick = () => {
-  if (!routineSteps.length || currentStepIndex >= routineSteps.length) return;
-  const now = Date.now();
-  const elapsed = Math.floor((now - stepStartTimestamp) / 1000);
-  stepRemaining = Math.max(0, stepRemaining - elapsed);
-  stepStartTimestamp = 0;
-  isPlaying = false;
-  clearInterval(timerInterval);
-  updateButtonStates();
-};
-
-playBtn.onclick = () => {
-  if (!routineSteps.length || currentStepIndex >= routineSteps.length) return;
-  isPlaying = true;
-  stepStartTimestamp = Date.now();
-  startStep(true); // suppress speech
-  updateButtonStates();
-};
-
-function populateDays() {
-  for (const d of program) {
-    const option = document.createElement("option");
-    option.value = d.day;
-    option.textContent = `Ziua ${d.day}`;
-    daySelect.appendChild(option);
-  }
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  voice = loadVoices();
-  if (synth.onvoiceschanged !== undefined) {
-    synth.onvoiceschanged = () => {
-      voice = loadVoices();
+      updateButtonStates();
     };
-  }
 
-  populateDays();
-  daySelect.value = 1;
-  loadDay(1);
-  updateButtonStates();
-});
+    playBtn.onclick = () => {
+      if (!routineSteps.length || currentStepIndex >= routineSteps.length) return;
+      isPlaying = true;
+      stepStartTimestamp = Date.now();
+      startStep(true);
+      updateButtonStates();
+    };
 
-
-
-function parseRoutine(text) {
-  if (!text || text.toLowerCase().includes("liber")) return [];
-
-  const normalize = str => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  const lines = text.split("\n");
-  const steps = [];
-
-  for (const line of lines) {
-    const cleaned = normalize(line.trim().toLowerCase());
-    const match = cleaned.match(/(mers rapid|alergare usoara|plimbare)\s*(\d+)\s*(min(ute)?)/);
-    if (match) {
-      const originalMatch = line.trim().match(/^(.*?)(\d+)\s*min(ute)?/i);
-      const label = originalMatch ? originalMatch[1].trim() : match[1]; // use original diacritic version
-      const min = parseInt(match[2]);
-      steps.push({ label, duration: min * 60 });
-    } else {
-      console.warn("Line not matched:", line);
+    function populateDays() {
+      for (const d of program) {
+        const option = document.createElement("option");
+        option.value = d.day;
+        option.textContent = `Ziua ${d.day}`;
+        daySelect.appendChild(option);
+      }
     }
-  }
 
-  return steps;
-}
+    document.addEventListener("DOMContentLoaded", () => {
+      voice = loadVoices();
+      if (synth.onvoiceschanged !== undefined) {
+        synth.onvoiceschanged = () => {
+          voice = loadVoices();
+        };
+      }
 
-function renderExerciseList() {
-  if (!routineSteps.length) {
-    exerciseText.textContent = program.find(p => p.day === currentDay)?.exercise || "";
-    return;
-  }
-
-  exerciseText.innerHTML = routineSteps.map((step, idx) => {
-    const classes = ['exercise-step'];
-    if (idx < currentStepIndex) classes.push('past-step');
-    else if (idx === currentStepIndex) classes.push('current-step');
-
-    // Show label + duration (in minutes)
-    const lineText = `${step.label} ${Math.round(step.duration / 60)} min`;
-
-    return `<div class="${classes.join(' ')}">${lineText}</div>`;
-  }).join('');
-}
-
-function loadDay(day) {
-  stopTimer();
-  currentDay = day;
-  const dayData = program.find(d => d.day === day);
-  if (!dayData) return;
-
-  routineSteps = parseRoutine(dayData.exercise);
-  currentStepIndex = 0;
-  stepRemaining = 0;
-  stepStartTimestamp = 0;
-  statusEl.textContent = "Așteaptă să începi...";
-  timerEl.textContent = "00:00";
-  renderExerciseList();
-  updateButtonStates();
-}
+      populateDays();
+      daySelect.value = 1;
+      loadDay(1);
+      updateButtonStates();
+    });
 
 
-function nextStep() {
-  currentStepIndex++;
-  stepRemaining = 0;
-  stepStartTimestamp = 0;
 
-  if (currentStepIndex < routineSteps.length) {
-    startStep();
-  } else {
-    isPlaying = false;
-    statusEl.textContent = "Gata! Ai terminat rutina.";
-    timerEl.textContent = "00:00";
-    clearInterval(timerInterval); // ✅ ensure timer stops
-  }
+    function parseRoutine(text) {
+      if (!text || text.toLowerCase().includes("liber")) return [];
 
-  updateButtonStates();
-}
+      const normalize = str => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      const lines = text.split("\n");
+      const steps = [];
 
-function stopTimer() {
-  isPlaying = false;
-  currentStepIndex = 0;
-  if (timerInterval) clearInterval(timerInterval);
-  timerEl.textContent = "00:00";
-  stepRemaining = 0;
-  stepStartTimestamp = 0;
-}
+      for (const line of lines) {
+        const cleaned = normalize(line.trim().toLowerCase());
+        const match = cleaned.match(/(mers rapid|alergare usoara|plimbare)\s*(\d+)\s*(min(ute)?)/);
+        if (match) {
+          const originalMatch = line.trim().match(/^(.*?)(\d+)\s*min(ute)?/i);
+          const label = originalMatch ? originalMatch[1].trim() : match[1]; // use original diacritic version
+          const min = parseInt(match[2]);
+          steps.push({ label, duration: min * 60 });
+        } else {
+          console.warn("Line not matched:", line);
+        }
+      }
 
-daySelect.onchange = () => {
-  loadDay(parseInt(daySelect.value));
-  updateButtonStates(); 
-};
+      return steps;
+    }
 
-startBtn.onclick = () => {
-  // Warm up beep to allow mobile playback
-  const beep = document.getElementById("beepSound");
-  beep.play().then(() => {
-    beep.pause();
-    beep.currentTime = 0;
-  }).catch((e) => {
-    console.log("Initial beep warm-up failed:", e);
-  });
+    function renderExerciseList() {
+      if (!routineSteps.length) {
+        exerciseText.textContent = program.find(p => p.day === currentDay)?.exercise || "";
+        return;
+      }
 
-    const silentAudio = document.getElementById("silentAudio");
-  silentAudio.play().catch((err) => {
-    console.warn("Silent audio failed to play:", err);
-  });
+      exerciseText.innerHTML = routineSteps.map((step, idx) => {
+        const classes = ['exercise-step'];
+        if (idx < currentStepIndex) classes.push('past-step');
+        else if (idx === currentStepIndex) classes.push('current-step');
 
-  if (!isPlaying) startTimer();
-};
+        const lineText = `${step.label} ${Math.round(step.duration / 60)} min`;
 
-skipBtn.onclick = () => {
-  if (!routineSteps.length || currentStepIndex >= routineSteps.length) return;
-  nextStep();
-  updateButtonStates();
-};
+        return `<div class="${classes.join(' ')}">${lineText}</div>`;
+      }).join('');
+    }
 
-function startTimer() {
-  if (routineSteps.length === 0) {
-    statusEl.textContent = "Zi liberă. Nu există exerciții.";
-    timerEl.textContent = "00:00";
-    return;
-  }
-  isPlaying = true;
-  currentStepIndex = 0;
-  startBtn.disabled = true;
-  startStep();
-  updateButtonStates();
-}
+    function loadDay(day) {
+      stopTimer();
+      currentDay = day;
+      const dayData = program.find(d => d.day === day);
+      if (!dayData) return;
 
-</script>
-<audio id="silentAudio" src="silent.mp3" loop></audio>
-</body>
+      routineSteps = parseRoutine(dayData.exercise);
+      currentStepIndex = 0;
+      stepRemaining = 0;
+      stepStartTimestamp = 0;
+      statusEl.textContent = "Așteaptă să începi...";
+      timerEl.textContent = "00:00";
+      renderExerciseList();
+      updateButtonStates();
+    }
+      
+    function nextStep() {
+      currentStepIndex++;
+      stepRemaining = 0;
+      stepStartTimestamp = 0;
+
+      if (currentStepIndex < routineSteps.length) {
+        startStep();
+      } else {
+        isPlaying = false;
+        statusEl.textContent = "Felicitari! Ai terminat rutina.";
+        timerEl.textContent = "00:00";
+        clearInterval(timerInterval);
+      }
+
+      updateButtonStates();
+    }
+
+    function stopTimer() {
+      isPlaying = false;
+      currentStepIndex = 0;
+      if (timerInterval) clearInterval(timerInterval);
+      timerEl.textContent = "00:00";
+      stepRemaining = 0;
+      stepStartTimestamp = 0;
+    }
+
+    daySelect.onchange = () => {
+      loadDay(parseInt(daySelect.value));
+      updateButtonStates(); 
+    };
+
+    startBtn.onclick = () => {
+      const beep = document.getElementById("beepSound");
+      beep.play().then(() => {
+        beep.pause();
+        beep.currentTime = 0;
+      }).catch((e) => {
+        console.log("Initial beep warm-up failed:", e);
+      });
+
+        const silentAudio = document.getElementById("silentAudio");
+      silentAudio.play().catch((err) => {
+        console.warn("Silent audio failed to play:", err);
+      });
+
+      if (!isPlaying) startTimer();
+    };
+
+    skipBtn.onclick = () => {
+      if (!routineSteps.length || currentStepIndex >= routineSteps.length) return;
+      nextStep();
+      updateButtonStates();
+    };
+
+    function startTimer() {
+      if (routineSteps.length === 0) {
+        statusEl.textContent = "Zi liberă. Nu există exerciții.";
+        timerEl.textContent = "00:00";
+        return;
+      }
+      isPlaying = true;
+      currentStepIndex = 0;
+      startBtn.disabled = true;
+      startStep();
+      updateButtonStates();
+    }
+
+    </script>
+  <audio id="silentAudio" src="silent.mp3" loop></audio>
+  </body>
 </html>
