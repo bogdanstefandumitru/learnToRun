@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Program Exerciții cu Timer</title>
   <link rel="manifest" href="manifest.json" />
+  <link rel="icon" sizes="192x192" href="icon-192.png">
+  <meta name="theme-color" content="#ffffff" />
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -46,9 +48,10 @@
   <button id="skipBtn">Skip</button>
 </div>
 
-<!-- Hidden audio element for beep -->
+<!-- Audio for beep -->
 <audio id="beepSound" preload="auto">
   <source src="beep.mp3" type="audio/mpeg" />
+  <source src="beep.wav" type="audio/wav" />
 </audio>
 
 <script>
@@ -188,90 +191,58 @@ alergare ușoară 15 min`, duration: 48 * 60 },
   const startBtn = document.getElementById("startBtn");
   const playPauseBtn = document.getElementById("playPauseBtn");
   const skipBtn = document.getElementById("skipBtn");
-
-  let currentDay = 1;
-  let routineSteps = [];
-  let currentStepIndex = 0;
-  let stepRemaining = 0;
-  let timerInterval = null;
-  let isPlaying = false;
-  let stepStartTimestamp = null;
-
   let synth = window.speechSynthesis;
-  let voices = [];
-  let voice = null;
+let voices = [];
+let voice = null;
 
-  function loadVoices() {
-    voices = synth.getVoices();
-    let v = voices.find(v => v.lang.startsWith('ro') && (v.name.toLowerCase().includes("alex") || v.name.toLowerCase().includes("male")));
-    if (!v) v = voices.find(v => v.lang.startsWith('ro'));
-    if (!v && voices.length) v = voices[0];
-    return v;
-  }
+function loadVoices() {
+  voices = synth.getVoices();
+  let v = voices.find(v => v.lang.startsWith('ro') && (v.name.toLowerCase().includes("alex") || v.name.toLowerCase().includes("male")));
+  if (!v) v = voices.find(v => v.lang.startsWith('ro'));
+  if (!v && voices.length) v = voices[0];
+  return v;
+}
 
-  function speak(text) {
-    if (!synth) return;
-    synth.cancel();
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.voice = voice;
-    utter.lang = "ro-RO";
-    utter.rate = 1;
-    utter.pitch = 0.9;
-    synth.speak(utter);
-  }
+function speak(text) {
+  if (!synth) return;
+  synth.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.voice = voice;
+  utter.lang = "ro-RO";
+  utter.rate = 1;
+  utter.pitch = 0.9;
+  synth.speak(utter);
+}
 
+  // Modify playBeep to ensure reliable playback
   function playBeep() {
     const beep = document.getElementById("beepSound");
+    beep.pause();
     beep.currentTime = 0;
-    beep.play().catch(() => {});
+    beep.play().catch(err => {
+      console.log("Beep blocked or failed:", err);
+    });
   }
 
-  function updateTimerDisplay(seconds) {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    timerEl.textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  }
-
-  function parseRoutine(text) {
-    if (!text || text.toLowerCase().includes("liber")) return [];
-    const lines = text.split("\n");
-    const steps = [];
-    const regex = /(mers rapid|alergare ușoară|plimbare)\s*(\d+)\s*(min|minute)/i;
-    for (const line of lines) {
-      const m = line.match(regex);
-      if (m) {
-        const label = m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase();
-        const min = parseInt(m[2]);
-        steps.push({ label, duration: min * 60 });
-      }
-    }
-    return steps;
-  }
-
-  function nextStep() {
-    currentStepIndex++;
-    if (currentStepIndex >= routineSteps.length) {
-      stopTimer();
-      statusEl.textContent = "Exercițiul s-a terminat!";
-      speak("Exercițiul s-a terminat!");
-      return;
-    }
-    startStep();
-  }
-
+  // In startStep, ensure beeps only play once per second
   function startStep() {
     if (routineSteps.length === 0) {
       statusEl.textContent = "Zi liberă. Nu există exerciții.";
       timerEl.textContent = "00:00";
       return;
     }
+
     const step = routineSteps[currentStepIndex];
     stepRemaining = step.duration;
     stepStartTimestamp = Date.now();
     statusEl.textContent = step.label;
     speak(step.label);
     updateTimerDisplay(stepRemaining);
+
     if (timerInterval) clearInterval(timerInterval);
+
+    let lastBeepSecond = null;
+
     timerInterval = setInterval(() => {
       if (!isPlaying) return;
 
@@ -280,7 +251,8 @@ alergare ușoară 15 min`, duration: 48 * 60 },
 
       updateTimerDisplay(remaining);
 
-      if (remaining > 0 && remaining <= 5) {
+      if (remaining > 0 && remaining <= 5 && remaining !== lastBeepSecond) {
+        lastBeepSecond = remaining;
         playBeep();
       }
 
@@ -288,51 +260,10 @@ alergare ușoară 15 min`, duration: 48 * 60 },
         clearInterval(timerInterval);
         nextStep();
       }
-    }, 1000);
+    }, 200);
   }
 
-  function startTimer() {
-    if (routineSteps.length === 0) {
-      statusEl.textContent = "Zi liberă. Nu există exerciții.";
-      timerEl.textContent = "00:00";
-      return;
-    }
-    isPlaying = true;
-    startStep();
-  }
-
-  function stopTimer() {
-    isPlaying = false;
-    currentStepIndex = 0;
-    if (timerInterval) clearInterval(timerInterval);
-    timerEl.textContent = "00:00";
-  }
-
-  function populateDays() {
-    for (const d of program) {
-      const option = document.createElement("option");
-      option.value = d.day;
-      option.textContent = `Ziua ${d.day}`;
-      daySelect.appendChild(option);
-    }
-  }
-
-  function loadDay(day) {
-    stopTimer();
-    currentDay = day;
-    const dayData = program.find(d => d.day === day);
-    if (!dayData) return;
-    exerciseText.textContent = dayData.exercise;
-    routineSteps = parseRoutine(dayData.exercise);
-    currentStepIndex = 0;
-    statusEl.textContent = "Așteaptă să începi...";
-    timerEl.textContent = "00:00";
-  }
-
-  startBtn.onclick = () => {
-    if (!isPlaying) startTimer();
-  };
-
+  // Fix resume from pause
   playPauseBtn.onclick = () => {
     if (!routineSteps.length) return;
     isPlaying = !isPlaying;
@@ -344,26 +275,87 @@ alergare ușoară 15 min`, duration: 48 * 60 },
       : "Pauză";
   };
 
-  skipBtn.onclick = () => {
-    if (!routineSteps.length) return;
-    nextStep();
-  };
+document.addEventListener("DOMContentLoaded", () => {
+  voice = loadVoices();
+  if (synth.onvoiceschanged !== undefined) {
+    synth.onvoiceschanged = () => {
+      voice = loadVoices();
+    };
+  }
 
-  daySelect.onchange = () => {
-    loadDay(parseInt(daySelect.value));
-  };
+  populateDays();
+  daySelect.value = 1;
+  loadDay(1);
+});
 
-  document.addEventListener("DOMContentLoaded", () => {
-    populateDays();
-    daySelect.value = 1;
-    loadDay(1);
-    voice = loadVoices();
-    if (synth.onvoiceschanged !== undefined) {
-      synth.onvoiceschanged = () => {
-        voice = loadVoices();
-      };
+    function populateDays() {
+  for (const d of program) {
+    const option = document.createElement("option");
+    option.value = d.day;
+    option.textContent = `Ziua ${d.day}`;
+    daySelect.appendChild(option);
+  }
+}
+
+function parseRoutine(text) {
+  if (!text || text.toLowerCase().includes("liber")) return [];
+  const lines = text.split("\n");
+  const steps = [];
+  const regex = /(mers rapid|alergare ușoară|plimbare)\s*(\d+)\s*(min|minute)/i;
+  for (const line of lines) {
+    const m = line.match(regex);
+    if (m) {
+      const label = m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase();
+      const min = parseInt(m[2]);
+      steps.push({ label, duration: min * 60 });
     }
-  });
+  }
+  return steps;
+}
+
+function loadDay(day) {
+  stopTimer();
+  currentDay = day;
+  const dayData = program.find(d => d.day === day);
+  if (!dayData) return;
+  exerciseText.textContent = dayData.exercise;
+  routineSteps = parseRoutine(dayData.exercise);
+  currentStepIndex = 0;
+  statusEl.textContent = "Așteaptă să începi...";
+  timerEl.textContent = "00:00";
+}
+
+function stopTimer() {
+  isPlaying = false;
+  currentStepIndex = 0;
+  if (timerInterval) clearInterval(timerInterval);
+  timerEl.textContent = "00:00";
+}
+
+daySelect.onchange = () => {
+  loadDay(parseInt(daySelect.value));
+};
+
+startBtn.onclick = () => {
+  if (!isPlaying) startTimer();
+};
+
+skipBtn.onclick = () => {
+  if (!routineSteps.length) return;
+  nextStep();
+};
+
+function startTimer() {
+  if (routineSteps.length === 0) {
+    statusEl.textContent = "Zi liberă. Nu există exerciții.";
+    timerEl.textContent = "00:00";
+    return;
+  }
+  isPlaying = true;
+  startStep();
+}
+
+});
 </script>
 </body>
 </html>
