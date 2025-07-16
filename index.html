@@ -106,6 +106,10 @@
           font-size: 32px;
           vertical-align: middle;
         }
+          #timerContainer {
+          text-align: center;
+          margin-bottom: 24px;
+        }
       </style>
     </head>
     <body>
@@ -117,8 +121,10 @@
 
     <div id="exerciseText"></div>
 
-    <div id="timer">00:00</div>
-    <div id="status">Așteaptă să începi...</div>
+    <div id="timerContainer">
+      <div id="timer">00:00</div>
+      <div id="status">Așteaptă să începi...</div>
+    </div>
 
     <div style="text-align:center;">
     <button id="startBtn" disabled title="Start">
@@ -319,6 +325,11 @@
       return v;
     }
 
+    function setTimerVisibility(visible) {
+      const container = document.getElementById("timerContainer");
+      container.style.display = visible ? "block" : "none";
+    }
+
     function speak(text) {
       if (!synth) return;
       synth.cancel();
@@ -347,6 +358,7 @@
 
     function startStep(suppressSpeech = false) {
       if (routineSteps.length === 0) {
+        setTimerVisibility(false);
         statusEl.textContent = "Zi liberă. Nu există exerciții.";
         timerEl.textContent = "00:00";
         return;
@@ -489,6 +501,7 @@
       timerEl.textContent = "00:00";
       renderExerciseList();
       updateButtonStates();
+      setTimerVisibility(routineSteps.length > 0);
     }
       
     function nextStep() {
@@ -503,6 +516,7 @@
         statusEl.textContent = "Felicitari! Ai terminat rutina.";
         timerEl.textContent = "00:00";
         clearInterval(timerInterval);
+        setTimerVisibility(false);
       }
 
       updateButtonStates();
