@@ -510,9 +510,8 @@
         statusEl.textContent = "Felicitari! Ai terminat rutina.";
         timerEl.textContent = "00:00";
         clearInterval(timerInterval);
-        setTimerVisibility(false);
+        renderExerciseList();
       }
-
       updateButtonStates();
     }
 
