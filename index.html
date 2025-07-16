@@ -205,6 +205,15 @@ let currentDay = 1;
 let voices = [];
 let voice = null;
 
+function updateButtonStates() {
+  const hasDaySelected = !!routineSteps.length;
+  const isStarted = isPlaying || currentStepIndex > 0;
+
+  startBtn.disabled = !hasDaySelected || isStarted;
+  skipBtn.disabled = !hasDaySelected;
+  playPauseBtn.disabled = !isStarted;
+}
+
 function loadVoices() {
   voices = synth.getVoices();
   let v = voices.find(v => v.lang.startsWith('ro') && (v.name.toLowerCase().includes("alex") || v.name.toLowerCase().includes("male")));
@@ -295,9 +304,11 @@ playPauseBtn.onclick = () => {
   statusEl.textContent = isPlaying
     ? routineSteps[currentStepIndex]?.label || "Continuare..."
     : "Pauză";
+
+  updateButtonStates();
 };
 
-      function populateDays() {
+function populateDays() {
   for (const d of program) {
     const option = document.createElement("option");
     option.value = d.day;
@@ -317,6 +328,7 @@ document.addEventListener("DOMContentLoaded", () => {
   populateDays();
   daySelect.value = 1;
   loadDay(1);
+  updateButtonStates();
 });
 
 
@@ -372,6 +384,7 @@ function loadDay(day) {
   currentStepIndex = 0;
   statusEl.textContent = "Așteaptă să începi...";
   timerEl.textContent = "00:00";
+  updateButtonStates();
 }
 
 function nextStep() {
@@ -424,6 +437,7 @@ startBtn.onclick = () => {
 skipBtn.onclick = () => {
   if (!routineSteps.length) return;
   nextStep();
+  updateButtonStates();
 };
 
 function startTimer() {
@@ -434,6 +448,7 @@ function startTimer() {
   }
   isPlaying = true;
   startStep();
+  updateButtonStates();
 }
 
 </script>
