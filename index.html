@@ -359,7 +359,7 @@ function startStep(suppressSpeech = false) {
   
     const now = Date.now();
     const elapsed = Math.floor((now - stepStartTimestamp) / 1000);
-    stepRemaining = Math.max(0, routineSteps[currentStepIndex].duration - elapsed);
+    stepRemaining = Math.max(0, stepRemaining - elapsed);
     updateTimerDisplay(stepRemaining);
   
     if (stepRemaining > 0 && stepRemaining <= 5 && stepRemaining !== lastBeepSecond) {
@@ -377,7 +377,9 @@ function startStep(suppressSpeech = false) {
 pauseBtn.onclick = () => {
   if (!routineSteps.length || currentStepIndex >= routineSteps.length) return;
   const now = Date.now();
-  stepRemaining = Math.max(0, stepRemaining - Math.floor((now - stepStartTimestamp) / 1000));
+  const elapsed = Math.floor((now - stepStartTimestamp) / 1000);
+  stepRemaining = Math.max(0, stepRemaining - elapsed);
+  stepStartTimestamp = 0;
   isPlaying = false;
   clearInterval(timerInterval);
   updateButtonStates();
@@ -385,9 +387,9 @@ pauseBtn.onclick = () => {
 
 playBtn.onclick = () => {
   if (!routineSteps.length || currentStepIndex >= routineSteps.length) return;
-  stepStartTimestamp = Date.now();
   isPlaying = true;
-  startStep(true); // ✅ FIXED: suppress speech when resuming
+  stepStartTimestamp = Date.now();
+  startStep(true); // ✅ suppress speech
   updateButtonStates();
 };
 
