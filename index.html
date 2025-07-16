@@ -359,15 +359,15 @@ function startStep(suppressSpeech = false) {
   
     const now = Date.now();
     const elapsed = Math.floor((now - stepStartTimestamp) / 1000);
-    stepRemaining = Math.max(0, stepRemaining - elapsed);
-    updateTimerDisplay(stepRemaining);
+    const remaining = Math.max(0, stepRemaining - elapsed);
+    updateTimerDisplay(remaining);
   
-    if (stepRemaining > 0 && stepRemaining <= 5 && stepRemaining !== lastBeepSecond) {
-      lastBeepSecond = stepRemaining;
+    if (remaining > 0 && remaining <= 5 && remaining !== lastBeepSecond) {
+      lastBeepSecond = remaining;
       playBeep();
     }
-  
-    if (stepRemaining <= 0) {
+    
+    if (remaining <= 0) {
       clearInterval(timerInterval);
       nextStep();
     }
@@ -389,7 +389,7 @@ playBtn.onclick = () => {
   if (!routineSteps.length || currentStepIndex >= routineSteps.length) return;
   isPlaying = true;
   stepStartTimestamp = Date.now();
-  startStep(true); // ✅ suppress speech
+  startStep(true); // suppress speech
   updateButtonStates();
 };
 
