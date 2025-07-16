@@ -491,7 +491,13 @@
       currentStepIndex = 0;
       stepRemaining = 0;
       stepStartTimestamp = 0;
-      statusEl.textContent = "Așteaptă să începi...";
+      if (routineSteps.length === 0) {
+        statusEl.textContent = "Azi e zi de relaxare.";
+        timerEl.style.display = "none";
+      } else {
+        statusEl.textContent = "Așteaptă să începi...";
+        timerEl.style.display = "block";
+      }
       timerEl.textContent = "00:00";
       renderExerciseList();
       updateButtonStates();
@@ -509,6 +515,7 @@
         isPlaying = false;
         statusEl.textContent = "Felicitari! Ai terminat rutina.";
         timerEl.textContent = "00:00";
+        timerEl.style.display = "none";
         clearInterval(timerInterval);
         renderExerciseList();
       }
