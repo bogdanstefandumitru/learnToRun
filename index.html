@@ -264,7 +264,9 @@ function speak(text) {
 
     const step = routineSteps[currentStepIndex];
     stepRemaining = stepRemaining || step.duration;
-    stepStartTimestamp = Date.now();
+    if (!stepStartTimestamp) {
+      stepStartTimestamp = Date.now();
+    }
     statusEl.textContent = step.label;
     speak(step.label);
     updateTimerDisplay(stepRemaining);
@@ -401,6 +403,7 @@ function nextStep() {
     timerEl.textContent = "00:00";
   }
   updateButtonStates();
+  stepStartTimestamp = 0;
 }
 
 function stopTimer() {
@@ -408,6 +411,7 @@ function stopTimer() {
   currentStepIndex = 0;
   if (timerInterval) clearInterval(timerInterval);
   timerEl.textContent = "00:00";
+  stepStartTimestamp = 0;
 }
 
 daySelect.onchange = () => {
