@@ -10,35 +10,56 @@
   <meta name="theme-color" content="#ffffff" />
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Roboto, sans-serif;
       max-width: 600px;
       margin: auto;
       padding: 20px;
-      background: #f9f9f9;
+      background: linear-gradient(to bottom, #e3f2fd, #ffffff);
+      color: #333;
     }
-    h1 { text-align: center; }
-    #exerciseText {
-      margin: 20px 0;
-      white-space: pre-line;
-      font-size: 18px;
-      line-height: 1.5;
-      padding: 10px;
-      background: #fff;
+    h1 {
+      text-align: center;
+      color: #1565c0;
+      margin-bottom: 16px;
+    }
+    label {
+      font-weight: bold;
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+    select {
+      font-size: 16px;
+      padding: 8px 12px;
+      border: 1px solid #ccc;
       border-radius: 8px;
-      border: 1px solid #ddd;
+      background: white;
+      margin-bottom: 20px;
+      width: 100%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    #exerciseText {
+      background: #ffffff;
+      border-left: 4px solid #2196f3;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 16px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      font-size: 17px;
     }
 
     #timer {
-      font-size: 56px;
+      font-size: 64px;
       font-weight: bold;
       text-align: center;
-      margin: 20px 0;
-      color: #333;
+      margin: 20px 0 10px;
+      color: #212121;
+      letter-spacing: 1px;
     }
+    
     #status {
-      font-size: 20px;
+      font-size: 22px;
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
       color: #555;
     }
     button {
@@ -63,13 +84,18 @@
     button:hover:not(:disabled) {
       background-color: #45a049;
     }
-    select {
-      font-size: 16px;
-      padding: 5px;
+    .exercise-step {
+      padding: 4px 0;
     }
-    .exercise-step { margin: 4px 0; }
-    .past-step { color: #999; }       /* Gray */
-    .current-step { color: green; font-weight: bold; }  /* Green and bold */
+    
+    .past-step {
+      color: #aaa;
+      text-decoration: line-through;
+    }
+    .current-step {
+      color: #2e7d32;
+      font-weight: bold;
+    }
     /* Red style for pause */
     #pauseBtn {
       background-color: #f44336; /* red background when active */
