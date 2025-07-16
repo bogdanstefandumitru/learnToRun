@@ -16,13 +16,48 @@
       background: #f9f9f9;
     }
     h1 { text-align: center; }
-    #exerciseText { margin: 20px 0; white-space: pre-line; }
-    #timer { font-size: 48px; text-align: center; margin: 10px 0; }
-    #status { font-size: 20px; text-align: center; margin: 10px 0; }
+    #exerciseText {
+      margin: 20px 0;
+      white-space: pre-line;
+      font-size: 18px;
+      line-height: 1.5;
+      padding: 10px;
+      background: #fff;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+
+    #timer {
+      font-size: 56px;
+      font-weight: bold;
+      text-align: center;
+      margin: 20px 0;
+      color: #333;
+    }
+    #status {
+      font-size: 20px;
+      text-align: center;
+      margin-bottom: 20px;
+      color: #555;
+    }
     button {
       margin: 5px;
-      padding: 10px 15px;
-      font-size: 16px;
+      padding: 12px 16px;
+      font-size: 24px;
+      border: none;
+      border-radius: 12px;
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      transition: background 0.2s ease;
+    }
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    button:hover:not(:disabled) {
+      background-color: #45a049;
     }
     select {
       font-size: 16px;
@@ -46,9 +81,9 @@
 <div id="status">Așteaptă să începi...</div>
 
 <div style="text-align:center;">
-  <button id="startBtn" disabled>Start</button>
-  <button id="playPauseBtn" disabled>Pauză</button>
-  <button id="skipBtn" disabled>Skip</button>
+  <button id="startBtn" disabled title="Start">🟢</button>
+  <button id="playPauseBtn" disabled title="Play/Pause">▶️</button>
+  <button id="skipBtn" disabled title="Skip">⏭️</button>
 </div>
 
 <!-- Audio for beep -->
@@ -208,15 +243,13 @@ Alergare ușoară 15 min`, duration: 48 * 60 },
 function updateButtonStates() {
   const hasDaySelected = !!routineSteps.length;
   const isFinished = currentStepIndex >= routineSteps.length;
-
-  // Start should only be enabled if no timer has started or paused
   const isAtBeginning = !isPlaying && currentStepIndex === 0 && stepRemaining === 0;
-  startBtn.disabled = !(hasDaySelected && isAtBeginning);
 
+  startBtn.disabled = !(hasDaySelected && isAtBeginning);
   playPauseBtn.disabled = !hasDaySelected || isFinished;
   skipBtn.disabled = !hasDaySelected || isAtBeginning || isFinished;
 
-  playPauseBtn.textContent = isPlaying ? "Pauză" : "Play";
+  playPauseBtn.textContent = isPlaying ? "⏸️" : "▶️";
 }
 
 function loadVoices() {
