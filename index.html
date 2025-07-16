@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+a<!DOCTYPE html>
 <html lang="ro">
 <head>
   <meta charset="UTF-8" />
@@ -191,6 +191,13 @@ alergare ușoară 15 min`, duration: 48 * 60 },
   const startBtn = document.getElementById("startBtn");
   const playPauseBtn = document.getElementById("playPauseBtn");
   const skipBtn = document.getElementById("skipBtn");
+  let routineSteps = [];
+let currentStepIndex = 0;
+let stepRemaining = 0;
+let stepStartTimestamp = 0;
+let timerInterval = null;
+let isPlaying = false;
+let currentDay = 1;
   let synth = window.speechSynthesis;
 let voices = [];
 let voice = null;
