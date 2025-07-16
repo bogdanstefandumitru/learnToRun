@@ -46,16 +46,19 @@
       font-size: 24px;
       border: none;
       border-radius: 12px;
-      background-color: #4CAF50;
+      background-color: #4CAF50; /* default green */
       color: white;
       cursor: pointer;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
       transition: background 0.2s ease;
     }
+    
     button:disabled {
       background-color: #ccc;
       cursor: not-allowed;
     }
+    
+    /* Hover effect for enabled buttons */
     button:hover:not(:disabled) {
       background-color: #45a049;
     }
@@ -68,10 +71,18 @@
     .current-step { color: green; font-weight: bold; }  /* Green and bold */
     /* Red style for pause */
     #pauseBtn {
-      background-color: #f44336;
+      background-color: #f44336; /* red background when active */
+      color: white;
     }
+    
     #pauseBtn:hover:not(:disabled) {
       background-color: #e53935;
+    }
+    
+    /* Keep red icon but gray background when disabled */
+    #pauseBtn:disabled {
+      background-color: #ccc; /* gray like other disabled buttons */
+      color: #f44336; /* red icon remains */
     }
   </style>
 </head>
@@ -89,7 +100,7 @@
 
 <div style="text-align:center;">
   <button id="startBtn" disabled title="Start">🟢</button>
-  <button id="pauseBtn" disabled title="Pauză" style="background-color: red; display: inline-block;">⏸️</button>
+  <button id="pauseBtn" disabled title="Pauză" style="display: inline-block;">🔴</button>
   <button id="playBtn" disabled title="Play" style="display: none;">▶️</button>
   <button id="skipBtn" disabled title="Skip">⏭️</button>
 </div>
