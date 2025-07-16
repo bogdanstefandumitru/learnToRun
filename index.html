@@ -209,7 +209,13 @@ function updateButtonStates() {
   const hasDaySelected = !!routineSteps.length;
   const hasStarted = isPlaying || currentStepIndex > 0;
 
-  startBtn.disabled = !hasDaySelected || hasStarted;
+  // Only enable start if a day is selected and nothing has started
+  if (!hasStarted) {
+    startBtn.disabled = !hasDaySelected;
+  } else {
+    startBtn.disabled = true;
+  }
+
   playPauseBtn.disabled = !hasStarted || currentStepIndex >= routineSteps.length;
   skipBtn.disabled = !hasStarted || currentStepIndex >= routineSteps.length;
 
@@ -298,15 +304,15 @@ playPauseBtn.onclick = () => {
   isPlaying = !isPlaying;
 
   if (isPlaying) {
-    // Resume from paused state
+    // Resume
     stepStartTimestamp = Date.now() - ((routineSteps[currentStepIndex].duration - stepRemaining) * 1000);
   } else {
-    // Calculate how much time is left when paused
+    // Pause
     const elapsed = Math.floor((Date.now() - stepStartTimestamp) / 1000);
     stepRemaining = routineSteps[currentStepIndex].duration - elapsed;
   }
 
-  updateButtonStates();
+  updateButtonStates(); 
 };
 
 function populateDays() {
@@ -450,7 +456,7 @@ function startTimer() {
   }
   isPlaying = true;
   currentStepIndex = 0;
-  startBtn.disabled = true; // disable start once clicked
+  startBtn.disabled = true;
   startStep();
   updateButtonStates();
 }
