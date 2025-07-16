@@ -207,17 +207,14 @@ Alergare ușoară 15 min`, duration: 48 * 60 },
 
 function updateButtonStates() {
   const hasDaySelected = !!routineSteps.length;
-  const hasStarted = isPlaying || currentStepIndex > 0;
+  const isFinished = currentStepIndex >= routineSteps.length;
 
-  // Only enable start if a day is selected and nothing has started
-  if (!hasStarted) {
-    startBtn.disabled = !hasDaySelected;
-  } else {
-    startBtn.disabled = true;
-  }
+  // Start should only be enabled if no timer has started or paused
+  const isAtBeginning = !isPlaying && currentStepIndex === 0 && stepRemaining === 0;
+  startBtn.disabled = !(hasDaySelected && isAtBeginning);
 
-  playPauseBtn.disabled = !hasStarted || currentStepIndex >= routineSteps.length;
-  skipBtn.disabled = !hasStarted || currentStepIndex >= routineSteps.length;
+  playPauseBtn.disabled = !hasDaySelected || isFinished;
+  skipBtn.disabled = !hasDaySelected || isAtBeginning || isFinished;
 
   playPauseBtn.textContent = isPlaying ? "Pauză" : "Play";
 }
@@ -301,18 +298,18 @@ function speak(text) {
 playPauseBtn.onclick = () => {
   if (!routineSteps.length || currentStepIndex >= routineSteps.length) return;
 
-  isPlaying = !isPlaying;
-
   if (isPlaying) {
-    // Resume
-    stepStartTimestamp = Date.now() - ((routineSteps[currentStepIndex].duration - stepRemaining) * 1000);
-  } else {
     // Pause
     const elapsed = Math.floor((Date.now() - stepStartTimestamp) / 1000);
     stepRemaining = routineSteps[currentStepIndex].duration - elapsed;
+    isPlaying = false;
+  } else {
+    // Resume
+    stepStartTimestamp = Date.now() - ((routineSteps[currentStepIndex].duration - stepRemaining) * 1000);
+    isPlaying = true;
   }
 
-  updateButtonStates(); 
+  updateButtonStates();
 };
 
 function populateDays() {
