@@ -303,12 +303,14 @@ playPauseBtn.onclick = () => {
   if (isPlaying) {
     // Pause
     const elapsed = Math.floor((Date.now() - stepStartTimestamp) / 1000);
-    stepRemaining = routineSteps[currentStepIndex].duration - elapsed;
+    stepRemaining = Math.max(0, stepRemaining - elapsed); // ✅ update remaining time based on current state
+    clearInterval(timerInterval); // ✅ stop interval immediately
     isPlaying = false;
   } else {
     // Resume
-    stepStartTimestamp = Date.now() - ((routineSteps[currentStepIndex].duration - stepRemaining) * 1000);
+    stepStartTimestamp = Date.now();
     isPlaying = true;
+    startStep(); 
   }
 
   updateButtonStates();
@@ -391,19 +393,25 @@ function loadDay(day) {
   statusEl.textContent = "Așteaptă să începi...";
   timerEl.textContent = "00:00";
   updateButtonStates();
+  stepRemaining = 0;
+  stepStartTimestamp = 0;
 }
 
 function nextStep() {
   currentStepIndex++;
+  stepRemaining = 0;
+  stepStartTimestamp = 0;
+
   if (currentStepIndex < routineSteps.length) {
     startStep();
   } else {
     isPlaying = false;
     statusEl.textContent = "Gata! Ai terminat rutina.";
     timerEl.textContent = "00:00";
+    clearInterval(timerInterval); // ✅ ensure timer stops
   }
+
   updateButtonStates();
-  stepStartTimestamp = 0;
 }
 
 function stopTimer() {
@@ -411,6 +419,7 @@ function stopTimer() {
   currentStepIndex = 0;
   if (timerInterval) clearInterval(timerInterval);
   timerEl.textContent = "00:00";
+  stepRemaining = 0;
   stepStartTimestamp = 0;
 }
 
