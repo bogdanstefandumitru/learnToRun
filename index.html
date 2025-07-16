@@ -321,7 +321,7 @@ function parseRoutine(text) {
 
   for (const line of lines) {
     const cleaned = normalize(line.trim().toLowerCase());
-    const match = cleaned.match(regex);
+    const match = cleaned.match(/(mers rapid|alergare usoara|plimbare)\s*(\d+)\s*(min(ute)?)/i);
     if (match) {
       const label = match[1][0].toUpperCase() + match[1].slice(1);
       const min = parseInt(match[2]);
