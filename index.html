@@ -46,9 +46,9 @@
 <div id="status">Așteaptă să începi...</div>
 
 <div style="text-align:center;">
-  <button id="startBtn">Start</button>
-  <button id="playPauseBtn">Play/Pauză</button>
-  <button id="skipBtn">Skip</button>
+  <button id="startBtn" disabled>Start</button>
+  <button id="playPauseBtn" disabled>Pauză</button>
+  <button id="skipBtn" disabled>Skip</button>
 </div>
 
 <!-- Audio for beep -->
@@ -207,11 +207,13 @@ let voice = null;
 
 function updateButtonStates() {
   const hasDaySelected = !!routineSteps.length;
-  const isStarted = isPlaying || currentStepIndex > 0;
+  const hasStarted = currentStepIndex > 0 || isPlaying;
 
-  startBtn.disabled = !hasDaySelected || isStarted;
-  skipBtn.disabled = !hasDaySelected;
-  playPauseBtn.disabled = !isStarted;
+  startBtn.disabled = !hasDaySelected || hasStarted;
+  skipBtn.disabled = !hasDaySelected || !hasStarted;
+  playPauseBtn.disabled = !hasDaySelected || !hasStarted;
+
+  playPauseBtn.textContent = isPlaying ? "Pauză" : "Play";
 }
 
 function loadVoices() {
@@ -290,15 +292,14 @@ function speak(text) {
     }, 200);
   }
 
-  // Fix resume from pause
 playPauseBtn.onclick = () => {
-  if (!routineSteps.length) return;
+  if (!routineSteps.length || currentStepIndex >= routineSteps.length) return;
 
   isPlaying = !isPlaying;
 
   if (isPlaying) {
     stepStartTimestamp = Date.now() - (stepRemaining - Math.floor(stepRemaining)) * 1000;
-    startStep(); // ✅ Resume the timer
+    startStep();
   }
 
   statusEl.textContent = isPlaying
@@ -396,7 +397,7 @@ function nextStep() {
     statusEl.textContent = "Gata! Ai terminat rutina.";
     timerEl.textContent = "00:00";
   }
-  renderExerciseList();
+  updateButtonStates();
 }
 
 function stopTimer() {
@@ -435,7 +436,7 @@ startBtn.onclick = () => {
 };
 
 skipBtn.onclick = () => {
-  if (!routineSteps.length) return;
+  if (!routineSteps.length || currentStepIndex >= routineSteps.length) return;
   nextStep();
   updateButtonStates();
 };
@@ -447,6 +448,7 @@ function startTimer() {
     return;
   }
   isPlaying = true;
+  currentStepIndex = 0;
   startStep();
   updateButtonStates();
 }
