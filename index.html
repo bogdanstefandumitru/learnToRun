@@ -82,7 +82,8 @@
 
 <div style="text-align:center;">
   <button id="startBtn" disabled title="Start">🟢</button>
-  <button id="playPauseBtn" disabled title="Play/Pause">▶️</button>
+  <button id="pauseBtn" disabled title="Pauză" style="background-color: red; display: inline-block;">⏸️</button>
+  <button id="playBtn" disabled title="Play" style="display: none;">▶️</button>
   <button id="skipBtn" disabled title="Skip">⏭️</button>
 </div>
 
@@ -246,10 +247,22 @@ function updateButtonStates() {
   const isAtBeginning = !isPlaying && currentStepIndex === 0 && stepRemaining === 0;
 
   startBtn.disabled = !(hasDaySelected && isAtBeginning);
-  playPauseBtn.disabled = !hasDaySelected || isFinished;
   skipBtn.disabled = !hasDaySelected || isAtBeginning || isFinished;
 
-  playPauseBtn.textContent = isPlaying ? "⏸️" : "▶️";
+  // Toggle Pause/Play buttons
+  if (isPlaying) {
+    pauseBtn.style.display = "inline-block";
+    pauseBtn.disabled = false;
+    playBtn.style.display = "none";
+  } else if (!isAtBeginning && !isFinished) {
+    pauseBtn.style.display = "none";
+    playBtn.style.display = "inline-block";
+    playBtn.disabled = false;
+  } else {
+    pauseBtn.style.display = "inline-block";
+    pauseBtn.disabled = true;
+    playBtn.style.display = "none";
+  }
 }
 
 function loadVoices() {
@@ -331,21 +344,20 @@ function startStep(suppressSpeech = false) {
   }, 200);
 }
 
-playPauseBtn.onclick = () => {
+pauseBtn.onclick = () => {
   if (!routineSteps.length || currentStepIndex >= routineSteps.length) return;
+  const elapsed = Math.floor((Date.now() - stepStartTimestamp) / 1000);
+  stepRemaining = routineSteps[currentStepIndex].duration - elapsed;
+  isPlaying = false;
+  clearInterval(timerInterval);
+  updateButtonStates();
+};
 
-  if (isPlaying) {
-    // Pause
-    const elapsed = Math.floor((Date.now() - stepStartTimestamp) / 1000);
-    stepRemaining = Math.max(0, stepRemaining - elapsed); // ✅ update remaining time based on current state
-    clearInterval(timerInterval); // ✅ stop interval immediately
-    isPlaying = false;
-  } else {
-    stepStartTimestamp = Date.now();
-    isPlaying = true;
-    startStep(true); 
-  }
-
+playBtn.onclick = () => {
+  if (!routineSteps.length || currentStepIndex >= routineSteps.length) return;
+  stepStartTimestamp = Date.now() - ((routineSteps[currentStepIndex].duration - stepRemaining) * 1000);
+  isPlaying = true;
+  startStep(); // resume the timer without resetting
   updateButtonStates();
 };
 
