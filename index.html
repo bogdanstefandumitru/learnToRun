@@ -1,4 +1,4 @@
-a<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ro">
 <head>
   <meta charset="UTF-8" />
@@ -271,16 +271,20 @@ function speak(text) {
   }
 
   // Fix resume from pause
-  playPauseBtn.onclick = () => {
-    if (!routineSteps.length) return;
-    isPlaying = !isPlaying;
-    if (isPlaying) {
-      stepStartTimestamp = Date.now() - (stepRemaining - Math.floor(stepRemaining)) * 1000;
-    }
-    statusEl.textContent = isPlaying
-      ? routineSteps[currentStepIndex]?.label || "Continuare..."
-      : "Pauză";
-  };
+playPauseBtn.onclick = () => {
+  if (!routineSteps.length) return;
+
+  isPlaying = !isPlaying;
+
+  if (isPlaying) {
+    stepStartTimestamp = Date.now() - (stepRemaining - Math.floor(stepRemaining)) * 1000;
+    startStep(); // ✅ Resume the timer
+  }
+
+  statusEl.textContent = isPlaying
+    ? routineSteps[currentStepIndex]?.label || "Continuare..."
+    : "Pauză";
+};
 
       function populateDays() {
   for (const d of program) {
@@ -332,6 +336,17 @@ function loadDay(day) {
   currentStepIndex = 0;
   statusEl.textContent = "Așteaptă să începi...";
   timerEl.textContent = "00:00";
+}
+
+function nextStep() {
+  currentStepIndex++;
+  if (currentStepIndex < routineSteps.length) {
+    startStep();
+  } else {
+    isPlaying = false;
+    statusEl.textContent = "Gata! Ai terminat rutina.";
+    timerEl.textContent = "00:00";
+  }
 }
 
 function stopTimer() {
