@@ -254,48 +254,49 @@ function speak(text) {
     timerEl.textContent = `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
   }
 
-  // In startStep, ensure beeps only play once per second
-  function startStep() {
-    if (routineSteps.length === 0) {
-      statusEl.textContent = "Zi liberă. Nu există exerciții.";
-      timerEl.textContent = "00:00";
-      return;
-    }
-
-    const step = routineSteps[currentStepIndex];
-    stepRemaining = stepRemaining || step.duration;
-    if (!stepStartTimestamp) {
-      stepStartTimestamp = Date.now();
-    }
-    statusEl.textContent = step.label;
-    speak(step.label);
-    updateTimerDisplay(stepRemaining);
-
-    renderExerciseList();
-
-    if (timerInterval) clearInterval(timerInterval);
-
-    let lastBeepSecond = null;
-
-    timerInterval = setInterval(() => {
-      if (!isPlaying) return;
-
-      const elapsed = Math.floor((Date.now() - stepStartTimestamp) / 1000);
-      const remaining = stepRemaining - elapsed;
-
-      updateTimerDisplay(remaining);
-
-      if (remaining > 0 && remaining <= 5 && remaining !== lastBeepSecond) {
-        lastBeepSecond = remaining;
-        playBeep();
-      }
-
-      if (remaining <= 0) {
-        clearInterval(timerInterval);
-        nextStep();
-      }
-    }, 200);
+function startStep(suppressSpeech = false) {
+  if (routineSteps.length === 0) {
+    statusEl.textContent = "Zi liberă. Nu există exerciții.";
+    timerEl.textContent = "00:00";
+    return;
   }
+
+  const step = routineSteps[currentStepIndex];
+  stepRemaining = stepRemaining || step.duration;
+  if (!stepStartTimestamp) {
+    stepStartTimestamp = Date.now();
+  }
+
+  statusEl.textContent = step.label;
+  if (!suppressSpeech) {
+    speak(step.label); // ✅ only speak if not resuming
+  }
+  updateTimerDisplay(stepRemaining);
+  renderExerciseList();
+
+  if (timerInterval) clearInterval(timerInterval);
+
+  let lastBeepSecond = null;
+
+  timerInterval = setInterval(() => {
+    if (!isPlaying) return;
+
+    const elapsed = Math.floor((Date.now() - stepStartTimestamp) / 1000);
+    const remaining = stepRemaining - elapsed;
+
+    updateTimerDisplay(remaining);
+
+    if (remaining > 0 && remaining <= 5 && remaining !== lastBeepSecond) {
+      lastBeepSecond = remaining;
+      playBeep();
+    }
+
+    if (remaining <= 0) {
+      clearInterval(timerInterval);
+      nextStep();
+    }
+  }, 200);
+}
 
 playPauseBtn.onclick = () => {
   if (!routineSteps.length || currentStepIndex >= routineSteps.length) return;
@@ -307,10 +308,9 @@ playPauseBtn.onclick = () => {
     clearInterval(timerInterval); // ✅ stop interval immediately
     isPlaying = false;
   } else {
-    // Resume
     stepStartTimestamp = Date.now();
     isPlaying = true;
-    startStep(); 
+    startStep(true); 
   }
 
   updateButtonStates();
@@ -387,15 +387,17 @@ function loadDay(day) {
   currentDay = day;
   const dayData = program.find(d => d.day === day);
   if (!dayData) return;
-  renderExerciseList();
+
   routineSteps = parseRoutine(dayData.exercise);
   currentStepIndex = 0;
-  statusEl.textContent = "Așteaptă să începi...";
-  timerEl.textContent = "00:00";
-  updateButtonStates();
   stepRemaining = 0;
   stepStartTimestamp = 0;
+  statusEl.textContent = "Așteaptă să începi...";
+  timerEl.textContent = "00:00";
+  renderExerciseList();
+  updateButtonStates();
 }
+
 
 function nextStep() {
   currentStepIndex++;
