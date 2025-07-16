@@ -231,6 +231,12 @@ function speak(text) {
     });
   }
 
+  function updateTimerDisplay(seconds) {
+    const min = Math.floor(seconds / 60);
+    const sec = seconds % 60;
+    timerEl.textContent = `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+  }
+
   // In startStep, ensure beeps only play once per second
   function startStep() {
     if (routineSteps.length === 0) {
