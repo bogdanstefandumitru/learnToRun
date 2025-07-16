@@ -28,6 +28,9 @@
       font-size: 16px;
       padding: 5px;
     }
+    .exercise-step { margin: 4px 0; }
+    .past-step { color: #999; }       /* Gray */
+    .current-step { color: green; font-weight: bold; }  /* Green and bold */
   </style>
 </head>
 <body>
@@ -252,6 +255,8 @@ function speak(text) {
     speak(step.label);
     updateTimerDisplay(stepRemaining);
 
+    renderExerciseList();
+
     if (timerInterval) clearInterval(timerInterval);
 
     let lastBeepSecond = null;
@@ -339,12 +344,26 @@ function parseRoutine(text) {
   return steps;
 }
 
+  function renderExerciseList() {
+  if (!routineSteps.length) {
+    exerciseText.textContent = program.find(p => p.day === currentDay)?.exercise || "";
+    return;
+  }
+
+  exerciseText.innerHTML = routineSteps.map((step, idx) => {
+    const classes = ['exercise-step'];
+    if (idx < currentStepIndex) classes.push('past-step');
+    else if (idx === currentStepIndex) classes.push('current-step');
+    return `<div class="${classes.join(' ')}">${step.label}</div>`;
+  }).join('');
+}
+
 function loadDay(day) {
   stopTimer();
   currentDay = day;
   const dayData = program.find(d => d.day === day);
   if (!dayData) return;
-  exerciseText.textContent = dayData.exercise;
+  renderExerciseList();
   routineSteps = parseRoutine(dayData.exercise);
   currentStepIndex = 0;
   statusEl.textContent = "Așteaptă să începi...";
@@ -360,6 +379,7 @@ function nextStep() {
     statusEl.textContent = "Gata! Ai terminat rutina.";
     timerEl.textContent = "00:00";
   }
+  renderExerciseList();
 }
 
 function stopTimer() {
