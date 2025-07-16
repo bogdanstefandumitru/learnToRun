@@ -435,24 +435,26 @@
 
     function parseRoutine(text) {
       if (!text || text.toLowerCase().includes("liber")) return [];
-
+    
       const normalize = str => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       const lines = text.split("\n");
       const steps = [];
-
+    
       for (const line of lines) {
+        if (!line.trim()) continue; // skip empty lines
+    
         const cleaned = normalize(line.trim().toLowerCase());
         const match = cleaned.match(/(mers rapid|alergare usoara|plimbare)\s*(\d+)\s*(min(ute)?)/);
         if (match) {
           const originalMatch = line.trim().match(/^(.*?)(\d+)\s*min(ute)?/i);
-          const label = originalMatch ? originalMatch[1].trim() : match[1]; // use original diacritic version
+          const label = originalMatch ? originalMatch[1].trim() : match[1]; 
           const min = parseInt(match[2]);
           steps.push({ label, duration: min * 60 });
         } else {
           console.warn("Line not matched:", line);
         }
       }
-
+    
       return steps;
     }
 
