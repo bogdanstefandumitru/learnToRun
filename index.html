@@ -314,7 +314,7 @@ function parseRoutine(text) {
   if (!text || text.toLowerCase().includes("liber")) return [];
   const lines = text.split("\n");
   const steps = [];
-  const regex = /(mers rapid|alergare ușoară|plimbare)\s*(\d+)\s*(min|minute)/i;
+  const regex = /(mers rapid|alergare ușoară|plimbare)\s*(\d+)\s*(min(ute)?)/i;
   for (const line of lines) {
     const m = line.match(regex);
     if (m) {
