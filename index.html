@@ -106,10 +106,6 @@
           font-size: 32px;
           vertical-align: middle;
         }
-          #timerContainer {
-          text-align: center;
-          margin-bottom: 24px;
-        }
       </style>
     </head>
     <body>
@@ -121,10 +117,8 @@
 
     <div id="exerciseText"></div>
 
-    <div id="timerContainer">
-      <div id="timer">00:00</div>
-      <div id="status">Așteaptă să începi...</div>
-    </div>
+    <div id="timer" style="text-align: center; font-size: 64px; font-weight: bold; margin: 20px 0 10px;">00:00</div>
+    <div id="status" style="text-align: center; font-size: 22px; margin-bottom: 24px;">Așteaptă să începi...</div>
 
     <div style="text-align:center;">
     <button id="startBtn" disabled title="Start">
@@ -326,8 +320,8 @@
     }
 
     function setTimerVisibility(visible) {
-      const container = document.getElementById("timerContainer");
-      container.style.display = visible ? "block" : "none";
+      const timer = document.getElementById("timer");
+      timer.style.display = visible ? "block" : "none";
     }
 
     function speak(text) {
