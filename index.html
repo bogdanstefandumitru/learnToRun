@@ -314,6 +314,7 @@ function parseRoutine(text) {
   if (!text || text.toLowerCase().includes("liber")) return [];
   const lines = text.split("\n");
   const steps = [];
+
   const normalize = str => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
   const regex = /(mers rapid|alergare usoara|plimbare)\s*(\d+)\s*(min(ute)?)/i;
@@ -327,6 +328,7 @@ function parseRoutine(text) {
       steps.push({ label, duration: min * 60 });
     }
   }
+
   return steps;
 }
 
