@@ -370,10 +370,25 @@ function stopTimer() {
 }
 
 daySelect.onchange = () => {
+  const beep = document.getElementById("beepSound");
+  beep.play().then(() => {
+    beep.pause();
+    beep.currentTime = 0;
+  }).catch(() => {});
+  
   loadDay(parseInt(daySelect.value));
 };
 
 startBtn.onclick = () => {
+  // Warm up beep to allow mobile playback
+  const beep = document.getElementById("beepSound");
+  beep.play().then(() => {
+    beep.pause();
+    beep.currentTime = 0;
+  }).catch((e) => {
+    console.log("Initial beep warm-up failed:", e);
+  });
+
   if (!isPlaying) startTimer();
 };
 
