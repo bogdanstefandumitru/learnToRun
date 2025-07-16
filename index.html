@@ -389,6 +389,11 @@ startBtn.onclick = () => {
     console.log("Initial beep warm-up failed:", e);
   });
 
+    const silentAudio = document.getElementById("silentAudio");
+  silentAudio.play().catch((err) => {
+    console.warn("Silent audio failed to play:", err);
+  });
+
   if (!isPlaying) startTimer();
 };
 
@@ -408,5 +413,6 @@ function startTimer() {
 }
 
 </script>
+<audio id="silentAudio" src="silent.mp3" loop></audio>
 </body>
 </html>
