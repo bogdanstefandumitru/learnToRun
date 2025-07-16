@@ -356,18 +356,18 @@ function startStep(suppressSpeech = false) {
 
   timerInterval = setInterval(() => {
     if (!isPlaying) return;
-
-    const elapsed = Math.floor((Date.now() - stepStartTimestamp) / 1000);
-    const remaining = stepRemaining - elapsed;
-
-    updateTimerDisplay(remaining);
-
-    if (remaining > 0 && remaining <= 5 && remaining !== lastBeepSecond) {
-      lastBeepSecond = remaining;
+  
+    const now = Date.now();
+    const elapsed = Math.floor((now - stepStartTimestamp) / 1000);
+    stepRemaining = Math.max(0, routineSteps[currentStepIndex].duration - elapsed);
+    updateTimerDisplay(stepRemaining);
+  
+    if (stepRemaining > 0 && stepRemaining <= 5 && stepRemaining !== lastBeepSecond) {
+      lastBeepSecond = stepRemaining;
       playBeep();
     }
-
-    if (remaining <= 0) {
+  
+    if (stepRemaining <= 0) {
       clearInterval(timerInterval);
       nextStep();
     }
@@ -376,17 +376,16 @@ function startStep(suppressSpeech = false) {
 
 pauseBtn.onclick = () => {
   if (!routineSteps.length || currentStepIndex >= routineSteps.length) return;
-  const elapsed = Math.floor((Date.now() - stepStartTimestamp) / 1000);
-  stepRemaining = routineSteps[currentStepIndex].duration - elapsed;
+  const now = Date.now();
+  stepRemaining = Math.max(0, stepRemaining - Math.floor((now - stepStartTimestamp) / 1000));
   isPlaying = false;
   clearInterval(timerInterval);
-  stepStartTimestamp = 0; // ✅ FIXED: reset timestamp so resume works properly
   updateButtonStates();
 };
 
 playBtn.onclick = () => {
   if (!routineSteps.length || currentStepIndex >= routineSteps.length) return;
-  stepStartTimestamp = Date.now() - ((routineSteps[currentStepIndex].duration - stepRemaining) * 1000);
+  stepStartTimestamp = Date.now();
   isPlaying = true;
   startStep(true); // ✅ FIXED: suppress speech when resuming
   updateButtonStates();
@@ -502,12 +501,6 @@ function stopTimer() {
 }
 
 daySelect.onchange = () => {
-  const beep = document.getElementById("beepSound");
-  beep.play().then(() => {
-    beep.pause();
-    beep.currentTime = 0;
-  }).catch(() => {});
-
   loadDay(parseInt(daySelect.value));
   updateButtonStates(); 
 };
