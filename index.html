@@ -368,6 +368,7 @@ pauseBtn.onclick = () => {
   stepRemaining = routineSteps[currentStepIndex].duration - elapsed;
   isPlaying = false;
   clearInterval(timerInterval);
+  stepStartTimestamp = 0; // ✅ FIXED: reset timestamp so resume works properly
   updateButtonStates();
 };
 
@@ -375,7 +376,7 @@ playBtn.onclick = () => {
   if (!routineSteps.length || currentStepIndex >= routineSteps.length) return;
   stepStartTimestamp = Date.now() - ((routineSteps[currentStepIndex].duration - stepRemaining) * 1000);
   isPlaying = true;
-  startStep(); // resume the timer without resetting
+  startStep(true); // ✅ FIXED: suppress speech when resuming
   updateButtonStates();
 };
 
