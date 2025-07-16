@@ -275,6 +275,15 @@ function speak(text) {
       : "Pauză";
   };
 
+      function populateDays() {
+  for (const d of program) {
+    const option = document.createElement("option");
+    option.value = d.day;
+    option.textContent = `Ziua ${d.day}`;
+    daySelect.appendChild(option);
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   voice = loadVoices();
   if (synth.onvoiceschanged !== undefined) {
@@ -288,14 +297,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loadDay(1);
 });
 
-    function populateDays() {
-  for (const d of program) {
-    const option = document.createElement("option");
-    option.value = d.day;
-    option.textContent = `Ziua ${d.day}`;
-    daySelect.appendChild(option);
-  }
-}
+
 
 function parseRoutine(text) {
   if (!text || text.toLowerCase().includes("liber")) return [];
