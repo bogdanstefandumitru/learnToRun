@@ -207,11 +207,11 @@ Alergare ușoară 15 min`, duration: 48 * 60 },
 
 function updateButtonStates() {
   const hasDaySelected = !!routineSteps.length;
-  const hasStarted = currentStepIndex > 0 || isPlaying;
+  const hasStarted = isPlaying || currentStepIndex > 0;
 
-  startBtn.disabled = true;
-  skipBtn.disabled = !hasStarted;
-  playPauseBtn.disabled = !hasDaySelected || currentStepIndex >= routineSteps.length;
+  startBtn.disabled = !hasDaySelected || hasStarted;
+  playPauseBtn.disabled = !hasStarted || currentStepIndex >= routineSteps.length;
+  skipBtn.disabled = !hasStarted || currentStepIndex >= routineSteps.length;
 
   playPauseBtn.textContent = isPlaying ? "Pauză" : "Play";
 }
@@ -413,8 +413,9 @@ daySelect.onchange = () => {
     beep.pause();
     beep.currentTime = 0;
   }).catch(() => {});
-  
+
   loadDay(parseInt(daySelect.value));
+  updateButtonStates(); 
 };
 
 startBtn.onclick = () => {
@@ -449,6 +450,7 @@ function startTimer() {
   }
   isPlaying = true;
   currentStepIndex = 0;
+  startBtn.disabled = true; // disable start once clicked
   startStep();
   updateButtonStates();
 }
