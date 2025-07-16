@@ -344,7 +344,7 @@ function parseRoutine(text) {
   return steps;
 }
 
-  function renderExerciseList() {
+function renderExerciseList() {
   if (!routineSteps.length) {
     exerciseText.textContent = program.find(p => p.day === currentDay)?.exercise || "";
     return;
@@ -354,7 +354,11 @@ function parseRoutine(text) {
     const classes = ['exercise-step'];
     if (idx < currentStepIndex) classes.push('past-step');
     else if (idx === currentStepIndex) classes.push('current-step');
-    return `<div class="${classes.join(' ')}">${step.label}</div>`;
+
+    // Show label + duration (in minutes)
+    const lineText = `${step.label} ${Math.round(step.duration / 60)} min`;
+
+    return `<div class="${classes.join(' ')}">${lineText}</div>`;
   }).join('');
 }
 
